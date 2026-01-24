@@ -1,48 +1,315 @@
-/* Scrollbar */
+/* ==================== SCROLLBAR ==================== */
 #extensions-list::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 #extensions-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 #extensions-list::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 3px;
 }
 
 #extensions-list::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #94a3b8;
 }
 
-/* Loading pulse */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+/* ==================== ANIMATIONS ==================== */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.loading-pulse {
-  animation: pulse 1.5s ease-in-out infinite;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Risk colors */
-.risk-critical { color: #dc2626; }
-.risk-high { color: #f59e0b; }
-.risk-medium { color: #3b82f6; }
-
-/* Animations */
 .extension-card {
   animation: slideIn 0.3s ease-out;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* ==================== RISK COLORS ==================== */
+.risk-critical { color: #dc2626; }
+.risk-high { color: #f59e0b; }
+.risk-medium { color: #3b82f6; }
+.risk-safe { color: #10b981; }
+
+/* ==================== STATS CARDS ==================== */
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 200ms;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ==================== SCAN BUTTON ==================== */
+.scan-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%);
+  color: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.scan-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+/* ==================== EXPORT BUTTON ==================== */
+.export-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 200ms;
+}
+
+.export-button:hover {
+  background: #f1f5f9;
+}
+
+/* ==================== EXTENSION CARD ==================== */
+.extension-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 200ms;
+  animation: slideIn 0.3s ease-out;
+}
+
+.extension-card:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* Score Badge */
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.score-badge.critical {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.score-badge.high {
+  background: #fed7aa;
+  color: #92400e;
+  border: 1px solid #fdba74;
+}
+
+.score-badge.medium {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.score-badge.safe {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+/* ==================== MODAL ==================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-close-btn {
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 200ms;
+}
+
+.modal-close-btn:hover {
+  background: #f1f5f9;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn-view {
+  font-size: 14px;
+  color: #2563eb;
+  background: transparent;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 200ms;
+  text-decoration: none;
+}
+
+.btn-view:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.btn-disable {
+  padding: 6px 12px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.btn-disable:hover {
+  background: #fde68a;
+}
+
+.btn-uninstall {
+  padding: 6px 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.btn-uninstall:hover {
+  background: #fecdd3;
+}
+
+/* ==================== MODAL SECTIONS ==================== */
+.modal-section {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.modal-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ==================== RISK INDICATOR ==================== */
+.risk-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.risk-indicator.critical {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.risk-indicator.high {
+  background: #fed7aa;
+  border: 1px solid #fdba74;
+}
+
+.risk-indicator.medium {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+}
+
+.risk-indicator.low {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
 }

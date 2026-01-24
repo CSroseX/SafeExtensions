@@ -30,18 +30,6 @@ function updateStats(results) {
   document.getElementById('risky-count').textContent = risky;
 }
 
-function renderExtensions(results) {
-  const container = document.getElementById('extensions-list');
-  container.innerHTML = '';
-
-  results.sort((a, b) => a.score - b.score);
-
-  results.forEach(ext => {
-    const card = getExtensionCard(ext);
-    container.appendChild(card);
-  });
-}
-
 function attachListeners() {
   document.getElementById('scan-now').addEventListener('click', async () => {
     showLoading(true);
@@ -54,6 +42,19 @@ function attachListeners() {
   document
     .getElementById('export-report')
     .addEventListener('click', exportReport);
+
+  // Close modal buttons
+  document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+    btn.addEventListener('click', closeDetailsModal);
+  });
+
+  // Click outside modal content closes modal
+  const modalOverlay = document.getElementById('details-modal');
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      closeDetailsModal();
+    }
+  });
 }
 
 function attachDelegatedActions() {
@@ -81,82 +82,123 @@ function attachDelegatedActions() {
 }
 
 function showLoading(show) {
-  document.getElementById('loading').classList.toggle('hidden', !show);
-  document
-    .getElementById('extensions-list')
-    .classList.toggle('hidden', show);
+  const loading = document.getElementById('loading');
+  const list = document.getElementById('extensions-list');
+  const empty = document.getElementById('empty-state');
+  
+  if (show) {
+    loading.style.display = 'flex';
+    list.style.display = 'none';
+    empty.style.display = 'none';
+  } else {
+    loading.style.display = 'none';
+  }
+}
+
+function renderExtensions(results) {
+  const container = document.getElementById('extensions-list');
+  const emptyState = document.getElementById('empty-state');
+  
+  container.innerHTML = '';
+
+  if (results.length === 0) {
+    container.style.display = 'none';
+    emptyState.style.display = 'flex';
+    return;
+  }
+
+  container.style.display = 'flex';
+  emptyState.style.display = 'none';
+
+  results.sort((a, b) => a.score - b.score);
+
+  results.forEach(ext => {
+    const card = getExtensionCard(ext);
+    container.appendChild(card);
+  });
 }
 
 function exportReport() {
   alert('Export feature coming soon!');
 }
 
+// Update modal display
+
+
 /* ---------- Global Actions ---------- */
-
-window.disableExtension = async (extensionId) => {
-  if (!confirm('Disable this extension?')) return;
-
-  try {
-    await new Promise((resolve, reject) => {
-      chrome.management.setEnabled(extensionId, false, () => {
-        if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
-        else resolve();
-      });
-    });
-
-    await loadAndDisplay();
-  } catch (err) {
-    alert('Failed to disable extension');
-  }
-};
-
-window.uninstallExtension = async (extensionId) => {
-  try {
-    await new Promise((resolve, reject) => {
-      chrome.management.uninstall(
-        extensionId,
-        { showConfirmDialog: true },
-        () => {
-          if (chrome.runtime.lastError) reject();
-          else resolve();
-        }
-      );
-    });
-
-    await loadAndDisplay();
-  } catch {
-    console.log('Uninstall cancelled');
-  }
-};
 
 window.viewDetails = async (extensionId) => {
   const scans = await getAllScans();
   const ext = scans.find(s => s.extensionId === extensionId);
   if (!ext) return;
 
+  const riskLevel = ext.score >= 7 ? 'safe' : ext.score >= 5 ? 'medium' : ext.score >= 3 ? 'high' : 'critical';
+
   document.getElementById('modal-title').textContent = ext.name;
   document.getElementById('modal-content').innerHTML = `
-    <div class="space-y-2 text-sm">
-      <div><strong>Version:</strong> ${ext.version}</div>
-      <div><strong>Score:</strong> ${ext.score}/10</div>
-      <div>
-        <strong>Permissions:</strong>
-        <ul class="list-disc pl-5">
-          ${ext.permissions.map(p => `<li>${p}</li>`).join('')}
-        </ul>
+    <div class="space-y-4">
+      <!-- Score Section -->
+      <div class="modal-section">
+        <div class="modal-section-title">Privacy Score</div>
+        <div class="flex items-center justify-between">
+          <span class="text-2xl font-bold ${riskLevel === 'critical' ? 'text-red-600' : riskLevel === 'high' ? 'text-orange-600' : riskLevel === 'medium' ? 'text-blue-600' : 'text-emerald-600'}">${ext.score}/10</span>
+          <span class="score-badge ${riskLevel}">${ext.score >= 7 ? 'Safe' : ext.score >= 5 ? 'Caution' : 'Risky'}</span>
+        </div>
       </div>
-      <div>
-        <strong>Risks:</strong>
-        <ul class="list-disc pl-5">
-          ${ext.risks.map(r => `<li>${r.title}</li>`).join('')}
-        </ul>
+
+      <!-- Version -->
+      <div class="modal-section">
+        <div class="modal-section-title">Version</div>
+        <p class="text-sm text-slate-700">${ext.version}</p>
       </div>
+
+      <!-- Permissions -->
+      ${ext.permissions && ext.permissions.length > 0 ? `
+        <div class="modal-section">
+          <div class="modal-section-title">Permissions (${ext.permissions.length})</div>
+          <div class="space-y-1 max-h-32 overflow-y-auto">
+            ${ext.permissions.map(p => `
+              <div class="flex items-center gap-2 text-sm text-slate-600">
+                <span class="text-blue-500">•</span>
+                <span>${p}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Risks -->
+      ${ext.risks && ext.risks.length > 0 ? `
+        <div class="modal-section">
+          <div class="modal-section-title">Detected Risks (${ext.risks.length})</div>
+          <div class="space-y-2">
+            ${ext.risks.map(r => `
+              <div class="risk-indicator ${r.severity}">
+                <span>${r.severity === 'critical' ? '🚨' : r.severity === 'high' ? '⚠️' : '⚡'}</span>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-slate-800">${r.title}</p>
+                  ${r.description ? `<p class="text-xs text-slate-600 mt-0.5">${r.description}</p>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : `
+        <div class="modal-section">
+          <p class="text-sm text-slate-600">✅ No major risks detected</p>
+        </div>
+      `}
     </div>
   `;
 
-  document.getElementById('details-modal').classList.remove('hidden');
+  document.getElementById('details-modal').classList.add('show');
+  document.getElementById('details-modal').style.display = 'flex';
 };
 
 window.closeDetailsModal = () => {
-  document.getElementById('details-modal').classList.add('hidden');
+  const modal = document.getElementById('details-modal');
+  modal.classList.remove('show');
+  modal.style.display = 'none';
 };
+
+/* ---------- Global Actions ---------- */

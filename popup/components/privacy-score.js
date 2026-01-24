@@ -1,15 +1,10 @@
-export function renderPrivacyScore(score) {
-  let colorClass = 'risk-medium';
-
-  if (score <= 3) colorClass = 'risk-critical';
-  else if (score <= 5) colorClass = 'risk-high';
-
+export function renderPrivacyScore(score, grade, riskLevel) {
   return `
-    <div class="text-right">
-      <div class="text-xs text-gray-500">Score</div>
-      <div class="font-bold ${colorClass}">
+    <div class="flex flex-col items-end gap-1">
+      <div class="score-badge ${riskLevel}">
         ${score}/10
       </div>
+      <span class="text-xs font-medium text-slate-500">${grade}</span>
     </div>
   `;
 }

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "SafeExtensions",
+  "version": "1.0.0",
+  "description": "Scan installed Chrome extensions and detect privacy risks locally",
+
+  "permissions": [
+    "management",
+    "storage",
+    "alarms",
+    "notifications"
+  ],
+
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+
+  "minimum_chrome_version": "114"
+}

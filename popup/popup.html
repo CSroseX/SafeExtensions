@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Privacy Guardian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./popup.css" />
+</head>
+
+<body class="w-[380px] bg-gray-100 text-gray-800">
+  <div class="p-4 space-y-4">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h1 class="text-lg font-bold">Privacy Guardian</h1>
+      <button id="scan-now"
+        class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+        Scan
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-2 text-center">
+      <div class="bg-white rounded p-2">
+        <div class="text-sm text-gray-500">Total</div>
+        <div id="total-extensions" class="font-bold text-lg">0</div>
+      </div>
+      <div class="bg-white rounded p-2">
+        <div class="text-sm text-gray-500">Safe</div>
+        <div id="safe-count" class="font-bold text-lg text-green-600">0</div>
+      </div>
+      <div class="bg-white rounded p-2">
+        <div class="text-sm text-gray-500">Risky</div>
+        <div id="risky-count" class="font-bold text-lg text-red-600">0</div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="hidden text-center py-6">
+      <div class="loading-pulse text-gray-500">Scanning extensions…</div>
+    </div>
+
+    <!-- Extensions List -->
+    <div id="extensions-list"
+      class="space-y-3 max-h-[420px] overflow-y-auto">
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center pt-2">
+      <button id="export-report"
+        class="text-sm text-blue-600 hover:underline">
+        Export report
+      </button>
+    </div>
+  </div>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4" id="modal-title"></h2>
+        <div id="modal-content"></div>
+        <button onclick="closeDetailsModal()" class="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+          Close
+        </button>
+      </div>
+    </div>
+
+  <script type="module" src="./popup.js"></script>
+</body>
+</html>

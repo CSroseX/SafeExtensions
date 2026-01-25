@@ -1,12 +1,16 @@
-export function renderActionButtons(extensionId) {
-  return `
-    <div class="flex gap-2">
+export function renderActionButtons(extensionId, isEnabled) {
+  const disableBtn = isEnabled === true ? `
       <button
         class="btn-disable disable-btn"
         data-extension-id="${extensionId}"
         title="Disable this extension">
         Disable
       </button>
+  ` : '';
+
+  return `
+    <div class="flex gap-2">
+      ${disableBtn}
       <button
         class="btn-uninstall uninstall-btn"
         data-extension-id="${extensionId}"

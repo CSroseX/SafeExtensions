@@ -16,7 +16,7 @@ export function renderActionButtons(extensionId, isEnabled) {
         data-extension-id="${extensionId}"
         title="Uninstall this extension">
         Uninstall
-      </button>
+C      </button>
     </div>
   `;
 }

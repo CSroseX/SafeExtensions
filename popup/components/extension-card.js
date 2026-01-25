@@ -14,7 +14,10 @@ export function getExtensionCard(ext) {
       <div class="flex items-start gap-2 flex-1 mr-3 min-w-0">
         <img id="icon-${ext.extensionId}" class="ext-icon" src="" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; background: #f1f5f9;" />
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-slate-800 text-sm mb-1 truncate">${ext.name}</h3>
+          <div class="flex items-center gap-1 mb-1">
+            <h3 class="font-semibold text-slate-800 text-sm truncate">${ext.name}</h3>
+            ${hasBroadHostAccess(ext) ? '<span class="pill pill-warning" title="Has access to all sites via host permissions like <all_urls>">Broad access</span>' : ''}
+          </div>
           <p class="text-xs text-slate-500">Version ${ext.version}</p>
         </div>
       </div>
@@ -41,7 +44,7 @@ export function getExtensionCard(ext) {
         data-extension-id="${ext.extensionId}">
         View Details →
       </button>
-      ${renderActionButtons(ext.extensionId)}
+      ${renderActionButtons(ext.extensionId, ext.enabled)}
     </div>
   `;
 
@@ -96,4 +99,9 @@ export function loadExtensionIcon(extensionId, imgElement) {
       }
     });
   }
+}
+
+function hasBroadHostAccess(ext) {
+  const hosts = ext.hostPermissions || [];
+  return hosts.some(p => p === '<all_urls>' || p === '*://*/*' || p === 'http://*/*' || p === 'https://*/*');
 }

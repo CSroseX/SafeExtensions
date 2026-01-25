@@ -5,24 +5,17 @@
   <title>SafeExtensions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Custom CSS -->
+  <!-- Custom CSS (replaces Tailwind CDN for CSP compliance) -->
   <link rel="stylesheet" href="./popup.css" />
 </head>
 
 <body style="width: 400px; height: 700px; display: flex; flex-direction: column;" class="bg-gradient-to-br from-slate-50 to-slate-100">
   
   <!-- Header -->
-  <header class="bg-white border-b border-slate-200 px-5 py-4" style="margin-bottom: 8px;">
+  <header id="header-bar" class="bg-white border-b border-slate-200 px-5 py-4 collapsible-section" style="margin-bottom: 8px;">
     <div style="display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 12px;">
-      <div class="flex items-start gap-3">
-        <div class="rounded-lg flex items-center justify-center" style="width: 28px; height: 28px; background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%);">
-          <svg style="width: 16px; height: 16px;" class="text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-        </div>
+      <div class="flex items-center gap-3">
+        <img src="../assets/icons/icon-16.png" alt="SafeExtensions" style="width: 28px; height: 28px; border-radius: 8px;" />
         <div class="flex flex-col gap-2">
           <div>
             <h1 class="text-lg font-bold text-slate-800">SafeExtensions</h1>
@@ -43,10 +36,10 @@
   </header>
 
   <!-- Stats Dashboard -->
-  <section class="px-5 py-4 bg-white border-b border-slate-200">
+  <section id="stats-bar" class="px-5 py-4 bg-white border-b border-slate-200 collapsible-section">
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
       <!-- Total -->
-      <div class="stat-card group hover:border-slate-300">
+      <div class="stat-card group hover:border-slate-300" style="flex: auto;">
         <div class="stat-icon bg-slate-100 text-slate-600">
           <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -68,7 +61,7 @@
       </div>
       
       <!-- Risky -->
-      <div class="stat-card group hover:border-red-200">
+      <div class="stat-card group hover:border-red-200" id="risky-stat-card" style="cursor: pointer;">
         <div class="stat-icon bg-red-50 text-red-600">
           <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -77,6 +70,35 @@
         <div id="risky-count" class="stat-number text-red-600">0</div>
         <div class="stat-label text-slate-600">Risky</div>
       </div>
+    </div>
+  </section>
+
+  <!-- Filter & Sort Bar -->
+  <section class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-select">Filter by</label>
+      <div class="select-wrapper">
+        <select id="filter-select">
+          <option value="all">All (<span id="filter-count-all">0</span>)</option>
+          <option value="active" selected>Active (<span id="filter-count-active">0</span>)</option>
+          <option value="disabled">Disabled (<span id="filter-count-disabled">0</span>)</option>
+          <option value="broad">Broad Access (<span id="filter-count-broad">0</span>)</option>
+          <option value="access">Access (<span id="filter-count-access">0</span>)</option>
+        </select>
+      </div>
+      <p class="helper-text" id="filter-helper">Showing Active extensions</p>
+    </div>
+
+    <div class="filter-group">
+      <label for="sort-select">Sort by</label>
+      <div class="select-wrapper">
+        <select id="sort-select">
+          <option value="risky" selected>Risky first</option>
+          <option value="medium">Medium first</option>
+          <option value="safe">Safe first</option>
+        </select>
+      </div>
+      <p class="helper-text">Applies to current filter</p>
     </div>
   </section>
 
@@ -118,6 +140,7 @@
       </svg>
       <span>Export Privacy Report</span>
     </button>
+    <p class="text-xs text-slate-500 mt-2" style="text-align:center;">Store data is informational only.</p>
   </footer>
 
   <!-- Details Modal -->
@@ -147,6 +170,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" aria-live="polite"></div>
 
   <script type="module" src="./popup.js"></script>
 </body>

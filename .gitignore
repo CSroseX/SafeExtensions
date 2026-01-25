@@ -2,3 +2,4 @@ node_modules/
 *.zip
 .DS_Store
 test-extensions/
+docs/PROJECT_FUNCTIONALITY.md

@@ -31,11 +31,9 @@ SafeExtensions scans installed Chrome extensions locally to surface privacy risk
 - 100% local analysis & storage: all data stays on your device
 
 ## Contributing
-See docs/CONTRIBUTING.md for guidelines focused on privacy-first, readable, auditable changes.
+Want to contribute? see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines focused on privacy-first, readable, auditable changes.
 
 ---
 This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE).
-
-Contributing: see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 Contact: chitransh.saxena.contact@gmail.com

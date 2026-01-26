@@ -32,5 +32,6 @@ No telemetry. No remote calls. All computation and storage are local.
 See docs/CONTRIBUTING.md for guidelines focused on privacy-first, readable, auditable changes.
 
 ---
-Example: This project is licensed under the MIT License ([LICENSE](LICENSE)).
-Connecting via email: chitransh.saxena.contact@gmail.com
+This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE).
+Contributing: see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+Contact: chitransh.saxena.contact@gmail.com

@@ -1,77 +1,86 @@
 # Contributing to SafeExtensions
 
-Thank you for your interest in contributing! This project is privacy-first and security-conscious. All analysis is 100% local—no telemetry, no tracking, no remote calls. Changes must keep the logic deterministic, auditable, and respectful of user privacy.
+Thanks for wanting to contribute! SafeExtensions is privacy-first and security-focused. Everything runs locally, there’s no telemetry, tracking, or remote calls. We want changes to be clear, auditable, and keep user privacy intact.
+
+---
 
 ## Project Principles
-- **Privacy-first design:** No data leaves the user’s device.
-- **Transparency & auditability:** Code must be readable, reviewable, and traceable.
-- **Deterministic logic:** Inputs produce predictable outputs; no hidden behaviors.
-- **No obfuscation or minification:** Source must remain inspectable; build artifacts should not hide logic.
-- **Why this matters:** Users trust us to protect privacy; clarity and determinism prevent regressions and misuse.
 
-## Beginner-Friendly Guide
-- New here? You’re welcome! Start with small issues: docs, tests, or UI polish.
-- To get setup help, open a GitHub Discussion or issue with a clear question and steps you tried.
-- If unsure, propose your plan in an issue before coding.
+SafeExtensions works the way it does for a reason:
 
-## Contribution Scope & Boundaries
-**Welcome:**
-- UI/UX improvements and polish
-- Performance optimizations
-- Reducing false positives
-- Documentation improvements
-- Tests (unit/integration/manual scripts)
-- New risk heuristics (with strong justification and readability)
+- **Privacy-first:** No data leaves the user’s machine.  
+- **Transparent and auditable:** Code should be easy to read and trace.  
+- **Deterministic logic:** Inputs always produce predictable outputs.  
+- **Readable code only:** No obfuscation or minified code. Comments and clarity matter more than clever tricks.
 
-**Restrictions:**
-- Large architectural changes: open an issue first and get approval.
-- New permissions/APIs: require strong reasoning and prior approval.
-- Changes to risk analyzer, scanner logic, or permissions handling: must explain rationale, data, and impact.
-- No obfuscation/minification in PRs.
-- No unexplained magic numbers—document intent.
-- Prefer clear, commented logic over cleverness.
+---
 
-## Bug Fixes vs Features
-- Bug fixes: Welcome; open an issue if impact or scope is non-trivial.
-- Features: Open an issue for discussion and approval before starting.
-- Both: Keep scope tight; one focused change per PR.
+## Getting Started
 
-## Issues Guidelines
-- Open an issue **before** PRs for any non-trivial change (especially security/privacy logic).
-- A good issue includes: context, expected vs actual behavior, steps to reproduce, proposed approach, and potential risks.
-- Security/privacy-impacting changes require prior discussion.
+If you’re new, start small. Fix a typo, improve documentation, polish the UI, or add a test.  
+Not sure where to start? Open a discussion or issue with your idea. For anything non-trivial, propose your plan before coding.
 
-## Pull Request Guidelines
-- One feature or fix per PR; no unrelated refactors.
-- Explain **why** the change is needed, not just **what** changed.
-- Commit messages: clear, descriptive (e.g., fix: handle missing host permissions).
-- Keep heuristic changes readable and well-commented.
-- No copied or proprietary code; cite sources for any referenced logic.
-- Add tests or manual verification notes where applicable.
-- Keep diffs minimal; avoid drive-by formatting changes.
+---
 
-## Security & Privacy Rules
-- Any change affecting security or privacy logic must be discussed first via issue.
-- Use responsible, professional tone for security topics.
-- No public “pressure” disclosures in issues—coordinate respectfully.
+## What You Can Work On
 
-## Testing & Quality Bar
-- Run applicable tests (unit/integration/manual steps) and describe what you ran.
-- Ensure deterministic behavior: avoid time, randomness, or environment-sensitive logic unless justified and documented.
-- If adding heuristics, include comments describing intent and expected impact.
+SafeExtensions is open to:
 
-## License & Legal (MPL-2.0)
-- By contributing, you agree your contributions are licensed under MPL-2.0.
-- You must own the code you submit; do not include proprietary or license-incompatible code.
-- Confirm third-party snippets are compatible and properly attributed.
+- UI and UX improvements  
+- Performance optimizations  
+- Reducing false positives  
+- Documentation or tests  
+- Adding new risk heuristics (explain why and keep it readable)  
+
+Changes that touch security, privacy, permissions, or the core scanner need prior discussion. Large architectural changes or new APIs require an issue and approval first.
+
+---
+
+## Issues and Pull Requests
+
+Open an issue before a PR if the change is anything more than minor. A good issue explains what’s wrong, what you expect, steps to reproduce, and any risks.  
+
+For PRs:
+
+- Keep it focused: one feature or fix per PR.  
+- Explain why the change matters, not just what changed.  
+- Make commit messages clear and descriptive.  
+- Keep code readable, commented, and minimal.  
+- No proprietary or copied code. Cite sources if needed.  
+- Add tests or manual verification steps if relevant.
+
+---
+
+## Testing and Quality
+
+Before submitting:
+
+- Run relevant tests and describe what you did.  
+- Make sure logic is deterministic; avoid relying on randomness or time.  
+- Heuristics should have comments explaining intent and impact.
+
+---
+
+## Security and Privacy
+
+Any change affecting security or privacy must be discussed in an issue first. Keep discussions professional and respectful. Never pressure others or publicly call out issues irresponsibly.
+
+---
+
+## Licensing
+
+By contributing, you agree your work is under MPL-2.0. You must own your code and not include incompatible proprietary code. Any third-party snippets should be compatible and properly credited.
+
+---
 
 ## Community Conduct
-- Be respectful; no harassment.
-- Keep discussions constructive, especially around security/privacy.
-- If a separate Code of Conduct exists, it applies here.
 
-## Final Decision Authority
-- Maintainers have final say on PR acceptance, architectural decisions, and security-sensitive changes.
-- If maintainers request changes or a redesign of your approach, please adjust before re-submitting.
+Be respectful. Keep discussions constructive, especially around security or privacy. If a separate Code of Conduct exists, it applies here too.
 
-Thank you for helping keep SafeExtensions privacy-first, transparent, and trustworthy.
+---
+
+## Final Word
+
+Maintainers have the final say on PRs, architecture, and security-sensitive changes. If feedback asks you to adjust your approach, please update before resubmitting.
+
+Thanks for helping make SafeExtensions clear, safe, and trustworthy!

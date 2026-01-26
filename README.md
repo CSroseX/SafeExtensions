@@ -26,7 +26,9 @@ SafeExtensions scans installed Chrome extensions locally to surface privacy risk
 - Optional TypeScript and linting/formatting configs
 
 ## Privacy
-No telemetry. No remote calls. All computation and storage are local.
+- No telemetry: nothing is tracked or sent anywhere
+- No remote calls: works fully offline
+- 100% local analysis & storage: all data stays on your device
 
 ## Contributing
 See docs/CONTRIBUTING.md for guidelines focused on privacy-first, readable, auditable changes.

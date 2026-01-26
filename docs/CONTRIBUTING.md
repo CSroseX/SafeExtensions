@@ -1,4 +1,4 @@
-# Contributing to SafeExtensions
+# Contributing to SafeExtensions 🫱🏻‍🫲🏻
 
 Thanks for wanting to contribute! SafeExtensions is privacy-first and security-focused. Everything runs locally, there’s no telemetry, tracking, or remote calls. We want changes to be clear, auditable, and keep user privacy intact.
 
@@ -69,7 +69,7 @@ Any change affecting security or privacy must be discussed in an issue first. Ke
 
 ## Licensing
 
-By contributing, you agree your work is under MPL-2.0. You must own your code and not include incompatible proprietary code. Any third-party snippets should be compatible and properly credited.
+By contributing, you agree your work is under [MPL-2.0](../LICENSE). You must own your code and not include incompatible proprietary code. Any third-party snippets should be compatible and properly credited.
 
 ---
 

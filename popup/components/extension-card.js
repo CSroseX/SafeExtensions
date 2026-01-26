@@ -11,8 +11,8 @@ export function getExtensionCard(ext) {
 
   card.innerHTML = `
     <div class="flex items-start justify-between mb-3">
-      <div class="flex items-start gap-2 flex-1 mr-3 min-w-0">
-        <img id="icon-${ext.extensionId}" class="ext-icon" src="" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; background: #f1f5f9;" />
+      <div class="flex items-start gap-3 flex-1 mr-3 min-w-0">
+        <img id="icon-${ext.extensionId}" class="ext-icon" src="" alt="" style="width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0; background: #f1f5f9;" />
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1 mb-1">
             <h3 class="font-semibold text-slate-800 text-sm truncate">${ext.name}</h3>

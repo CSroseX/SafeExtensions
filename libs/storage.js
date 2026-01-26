@@ -71,10 +71,7 @@ export async function deleteScan(extensionId) {
     const store = tx.objectStore(STORE_NAME);
     const request = store.delete(extensionId);
     
-    request.onsuccess = () => {
-      console.log(`✅ Deleted scan for extension: ${extensionId}`);
-      resolve();
-    };
+    request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
     
     // Wait for transaction to complete

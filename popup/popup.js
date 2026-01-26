@@ -58,14 +58,10 @@ async function loadAndDisplay(options = {}) {
 
   allExtensions = await getAllScans();
 
-  // Safety: Ensure all records have enabled field (in case of DB records from before the update)
-  console.log(`📋 Loaded ${allExtensions.length} scans from DB`);
-  console.log(`🔍 Scan enabled states before safety check:`, allExtensions.map(e => ({ name: e.name, enabled: e.enabled })));
-
   // Log any records missing enabled field
   const missingEnabled = allExtensions.filter(e => e.enabled === undefined);
   if (missingEnabled.length > 0) {
-    console.warn(`⚠️ ${missingEnabled.length} records missing 'enabled' field:`, missingEnabled.map(e => e.name));
+    console.warn(`${missingEnabled.length} records missing 'enabled' field:`, missingEnabled.map(e => e.name));
   }
 
   updateTabCounts(allExtensions);
@@ -112,8 +108,6 @@ function updateTabCounts(results) {
     disabled: disabledCount
   };
 
-  console.log(`📊 Counts`, counts);
-
   Object.entries(counts).forEach(([key, value]) => {
     const el = document.getElementById(`filter-count-${key}`);
     if (el) el.textContent = value;
@@ -121,22 +115,13 @@ function updateTabCounts(results) {
 }
 
 function filterExtensions(extensions, filter) {
-  let filtered;
   switch (filter) {
     case 'active':
-      filtered = extensions.filter(ext => ext.enabled === true);
-      console.log(`🔍 Active filter: ${filtered.length} of ${extensions.length} match (enabled === true)`);
-      console.log(`   Filtered:`, filtered.map(e => ({ name: e.name, enabled: e.enabled })));
-      return filtered;
+      return extensions.filter(ext => ext.enabled === true);
     case 'disabled':
-      // Catch both explicitly false and undefined/missing (backward compat with old DB records)
-      filtered = extensions.filter(ext => ext.enabled !== true);
-      console.log(`🔍 Disabled filter: ${filtered.length} of ${extensions.length} match (enabled !== true)`);
-      console.log(`   Filtered:`, filtered.map(e => ({ name: e.name, enabled: e.enabled })));
-      return filtered;
+      return extensions.filter(ext => ext.enabled !== true);
     case 'all':
     default:
-      console.log(`🔍 All filter: ${extensions.length} extensions`);
       return extensions;
   }
 }
@@ -627,8 +612,6 @@ window.enableExtension = async (extensionId) => {
   showLoading(true);
 
   try {
-    console.log('🔄 Enabling extension:', extensionId);
-
     // Step 1: Enable the extension
     await new Promise((resolve, reject) => {
       chrome.management.setEnabled(extensionId, true, () => {
@@ -639,8 +622,6 @@ window.enableExtension = async (extensionId) => {
         }
       });
     });
-
-    console.log('✅ Extension enabled, triggering rescan...');
 
     // Step 2: Wait for rescan to complete (with timeout)
     await new Promise((resolve, reject) => {
@@ -653,7 +634,6 @@ window.enableExtension = async (extensionId) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
-          console.log('✅ Rescan complete:', response);
           resolve();
         }
       });
@@ -661,8 +641,6 @@ window.enableExtension = async (extensionId) => {
 
     // Step 3: Small delay to ensure IndexedDB writes are flushed
     await new Promise(resolve => setTimeout(resolve, 100));
-
-    console.log('🔄 Refreshing UI...');
 
     // Step 4: Reload UI with fresh data (extension will move to Active filter)
     await loadAndDisplay({ skipLoading: true });
@@ -684,8 +662,6 @@ window.disableExtension = async (extensionId) => {
   showLoading(true);
 
   try {
-    console.log('🔄 Disabling extension:', extensionId);
-
     // Step 1: Disable the extension
     await new Promise((resolve, reject) => {
       chrome.management.setEnabled(extensionId, false, () => {
@@ -696,8 +672,6 @@ window.disableExtension = async (extensionId) => {
         }
       });
     });
-
-    console.log('✅ Extension disabled, triggering rescan...');
 
     // Step 2: Wait for rescan to complete (with timeout)
     await new Promise((resolve, reject) => {
@@ -710,7 +684,6 @@ window.disableExtension = async (extensionId) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
-          console.log('✅ Rescan complete:', response);
           resolve();
         }
       });
@@ -718,8 +691,6 @@ window.disableExtension = async (extensionId) => {
 
     // Step 3: Small delay to ensure IndexedDB writes are flushed
     await new Promise(resolve => setTimeout(resolve, 100));
-
-    console.log('🔄 Refreshing UI...');
 
     // Step 4: Reload UI with fresh data
     await loadAndDisplay({ skipLoading: true });
@@ -739,8 +710,6 @@ window.uninstallExtension = async (extensionId) => {
   showLoading(true);
 
   try {
-    console.log('🗑️ Uninstalling extension:', extensionId);
-
     // Step 1: Uninstall the extension (Chrome shows confirmation)
     await new Promise((resolve, reject) => {
       chrome.management.uninstall(
@@ -756,8 +725,6 @@ window.uninstallExtension = async (extensionId) => {
       );
     });
 
-    console.log('✅ Extension uninstalled, triggering rescan...');
-
     // Step 2: Wait for rescan to complete (with timeout)
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -769,7 +736,6 @@ window.uninstallExtension = async (extensionId) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
-          console.log('✅ Rescan complete:', response);
           resolve();
         }
       });
@@ -777,8 +743,6 @@ window.uninstallExtension = async (extensionId) => {
 
     // Step 3: Small delay to ensure IndexedDB writes are flushed
     await new Promise(resolve => setTimeout(resolve, 100));
-
-    console.log('🔄 Refreshing UI...');
 
     // Step 4: Reload UI with fresh data
     await loadAndDisplay({ skipLoading: true });

@@ -105,15 +105,11 @@ function updateTabCounts(results) {
   const allCount = results.length || 0;
   const activeCount = results.filter(r => r.enabled === true).length || 0;
   const disabledCount = results.filter(r => r.enabled !== true).length || 0; // Catch both false and undefined
-  const broadCount = results.filter(hasBroadHostAccess).length || 0;
-  const accessCount = results.filter(hasAnyAccess).length || 0;
 
   const counts = {
     all: allCount,
     active: activeCount,
-    disabled: disabledCount,
-    broad: broadCount,
-    access: accessCount
+    disabled: disabledCount
   };
 
   console.log(`📊 Counts`, counts);
@@ -137,16 +133,6 @@ function filterExtensions(extensions, filter) {
       filtered = extensions.filter(ext => ext.enabled !== true);
       console.log(`🔍 Disabled filter: ${filtered.length} of ${extensions.length} match (enabled !== true)`);
       console.log(`   Filtered:`, filtered.map(e => ({ name: e.name, enabled: e.enabled })));
-      return filtered;
-    case 'broad':
-      filtered = extensions.filter(hasBroadHostAccess);
-      console.log(`🔍 Broad access filter: ${filtered.length} of ${extensions.length} match (<all_urls> or *://*/*)`);
-      console.log(`   Filtered:`, filtered.map(e => ({ name: e.name, hostPermissions: e.hostPermissions })));
-      return filtered;
-    case 'access':
-      filtered = extensions.filter(hasAnyAccess);
-      console.log(`🔍 Access filter: ${filtered.length} of ${extensions.length} match (has any host permissions)`);
-      console.log(`   Filtered:`, filtered.map(e => ({ name: e.name, hostPermissions: e.hostPermissions })));
       return filtered;
     case 'all':
     default:
@@ -186,11 +172,21 @@ function sortExtensions(extensions, sortBy) {
   return [...extensions].sort((a, b) => {
     const bucketA = bucket(a.score || 0);
     const bucketB = bucket(b.score || 0);
+    
+    // Primary sort: by bucket order
     if (bucketA !== bucketB) {
       return order.indexOf(bucketA) - order.indexOf(bucketB);
     }
-    // Within same bucket, sort by score ascending for riskier first
-    return (a.score || 0) - (b.score || 0);
+    
+    // Secondary sort: within same bucket
+    // For risky first (ascending): show lowest scores first (riskiest first)
+    if (sortBy === 'risky') {
+      return (a.score || 0) - (b.score || 0);
+    }
+    // For safe first or medium first (descending): show highest scores first
+    else {
+      return (b.score || 0) - (a.score || 0);
+    }
   });
 }
 
@@ -244,17 +240,13 @@ function attachListeners() {
 }
 
 function attachDelegatedActions() {
+  // Handle button clicks (uninstall, view details)
   document.addEventListener('click', async (event) => {
     const target = event.target.closest('button');
     if (!target) return;
 
     const extensionId = target.dataset.extensionId;
     if (!extensionId) return;
-
-    if (target.classList.contains('disable-btn')) {
-      await window.disableExtension(extensionId);
-      return;
-    }
 
     if (target.classList.contains('uninstall-btn')) {
       await window.uninstallExtension(extensionId);
@@ -263,6 +255,23 @@ function attachDelegatedActions() {
 
     if (target.classList.contains('view-details-btn')) {
       await window.viewDetails(extensionId);
+    }
+  });
+
+  // Handle toggle switch changes
+  document.addEventListener('change', async (event) => {
+    const target = event.target;
+    if (!target.classList.contains('toggle-disable-btn')) return;
+
+    const extensionId = target.dataset.extensionId;
+    if (!extensionId) return;
+
+    // If toggling ON (checked), enable the extension
+    if (target.checked) {
+      await window.enableExtension(extensionId);
+    } else {
+      // If toggling OFF (unchecked), disable the extension
+      await window.disableExtension(extensionId);
     }
   });
 }
@@ -277,10 +286,10 @@ function attachScrollBehavior() {
 
   scrollInitialized = true;
   let collapsed = false;
-  const HIDE_THRESHOLD = 100; // Much higher to avoid premature hiding on initial scroll
-  const SHOW_THRESHOLD = 30; // Larger gap creates hysteresis, prevents jitter
+  const HIDE_THRESHOLD = 60; // Lower threshold starts collapse earlier for smooth progressive transition
+  const SHOW_THRESHOLD = 20; // Tight hysteresis for smooth feel
   let lastStateChange = 0;
-  const STATE_COOLDOWN_MS = 150; // Prevents rapid toggling
+  const STATE_COOLDOWN_MS = 100; // Reduced for more frequent smooth updates
 
   list.addEventListener('scroll', () => {
     if (scrollTicking) return;
@@ -313,6 +322,12 @@ function showLoading(show) {
   const list = document.getElementById('extensions-list');
   const empty = document.getElementById('empty-state');
   
+  // Guard against missing elements
+  if (!loading || !list || !empty) {
+    console.warn('Loading elements not found:', { loading, list, empty });
+    return;
+  }
+  
   if (show) {
     if (loadingHideTimeout) {
       clearTimeout(loadingHideTimeout);
@@ -320,7 +335,7 @@ function showLoading(show) {
 
     loadingStart = Date.now();
     loading.style.display = 'flex';
-    list.style.display = 'none';
+    list.style.display = 'flex';
     empty.style.display = 'none';
     return;
   } else {
@@ -341,7 +356,15 @@ function renderExtensions(results) {
   const container = document.getElementById('extensions-list');
   const emptyState = document.getElementById('empty-state');
   
-  container.innerHTML = '';
+  // Guard against missing elements
+  if (!container || !emptyState) {
+    console.warn('Container elements not found');
+    return;
+  }
+  
+  // Remove only extension cards, preserve loading element
+  const cards = container.querySelectorAll('.extension-card');
+  cards.forEach(card => card.remove());
 
   if (results.length === 0) {
     container.style.display = 'none';
@@ -363,8 +386,6 @@ function renderExtensions(results) {
   container.style.display = 'flex';
   emptyState.style.display = 'none';
 
-  results.sort((a, b) => a.score - b.score);
-
   // Create document fragment for batch rendering (prevents multiple reflows)
   const fragment = document.createDocumentFragment();
   
@@ -373,11 +394,23 @@ function renderExtensions(results) {
     fragment.appendChild(card);
   });
   
-  // Single DOM append - prevents incremental scrollbar resizing
-  container.appendChild(fragment);
+  // Append cards to container (preserving loading element)
+  const loadingEl = container.querySelector('#loading');
+  if (loadingEl && loadingEl.nextSibling) {
+    // Insert after loading element
+    container.insertBefore(fragment, loadingEl.nextSibling);
+  } else {
+    // No loading element or it's the last child, just append
+    container.appendChild(fragment);
+  }
   
   // Force synchronous layout calculation to stabilize scrollbar
   container.offsetHeight;
+  
+  // Trigger smooth expansion animation
+  container.classList.remove('expanding');
+  void container.offsetHeight; // Trigger reflow to restart animation
+  container.classList.add('expanding');
 }
 
 function attachFilterControls() {
@@ -588,6 +621,61 @@ window.closeDetailsModal = () => {
 };
 
 /* ---------- Global Actions ---------- */
+
+// Enable a disabled extension
+window.enableExtension = async (extensionId) => {
+  showLoading(true);
+
+  try {
+    console.log('🔄 Enabling extension:', extensionId);
+
+    // Step 1: Enable the extension
+    await new Promise((resolve, reject) => {
+      chrome.management.setEnabled(extensionId, true, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    console.log('✅ Extension enabled, triggering rescan...');
+
+    // Step 2: Wait for rescan to complete (with timeout)
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Rescan timeout'));
+      }, 5000); // 5 second timeout
+
+      chrome.runtime.sendMessage({ action: 'rescan' }, (response) => {
+        clearTimeout(timeout);
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          console.log('✅ Rescan complete:', response);
+          resolve();
+        }
+      });
+    });
+
+    // Step 3: Small delay to ensure IndexedDB writes are flushed
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    console.log('🔄 Refreshing UI...');
+
+    // Step 4: Reload UI with fresh data (extension will move to Active filter)
+    await loadAndDisplay({ skipLoading: true });
+    
+    showToast('✅ Extension enabled successfully', 'success');
+  } catch (error) {
+    const msg = error && error.message ? error.message : String(error);
+    console.error('❌ Enable failed:', error);
+    showToast('❌ Failed to enable: ' + msg, 'error');
+  } finally {
+    showLoading(false);
+  }
+};
 
 // Disable an extension (requires management permission)
 window.disableExtension = async (extensionId) => {

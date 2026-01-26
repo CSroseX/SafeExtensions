@@ -10,10 +10,10 @@ All extension scans are performed locally on your device. No data is sent to ext
 Scan results are stored in your browser's IndexedDB. Data never leaves your device.
 
 ## Permissions
-We request these permissions:
+We request only these permissions:
 - management: To read installed extension metadata
 - storage: To save scan results locally
 - alarms: To schedule periodic scans
 
 ## Contact
-Questions? Open an issue on GitHub.
+Questions? Open an issue on GitHub or email at chitransh.saxena.contact@gmail.com.

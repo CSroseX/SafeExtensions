@@ -3,6 +3,21 @@ import '../libs/chrome-api.js';
 
 import { getExtensionCard } from './components/extension-card.js';
 
+const TOUR_COMPLETED_KEY = 'tourCompleted';
+const TOUR_STEPS = [
+  { selector: '#scan-now', text: 'Click Scan to analyze your installed extensions for privacy risks.' },
+  { selector: '#stats-bar', text: 'The dashboard summarizes total, safe, and risky extensions at a glance.' },
+  { selector: '.filter-bar', text: 'Use filters and sorting to focus on active, disabled, or high-access extensions.' },
+  { selector: null, text: 'Please note: we do not encourage deleting extensions. Our goal is to make you aware of permissions. For more info, please use the About link.' }
+];
+
+let tourState = { active: false, index: 0 };
+let tourHighlightEl = null;
+let tourHighlightPrev = null;
+let tourHighlightContainer = null;
+let tourHighlightContainerPrev = null;
+let tourCutout = null;
+
 const MIN_LOADING_MS = 1000;
 let loadingStart = 0;
 let loadingHideTimeout;
@@ -23,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     attachListeners();
     attachDelegatedActions();
     attachScrollBehavior();
+    initializeOnboardingTour();
   });
 });
 
@@ -261,24 +277,31 @@ function attachScrollBehavior() {
 
   scrollInitialized = true;
   let collapsed = false;
-  const HIDE_THRESHOLD = 24;
-  const SHOW_THRESHOLD = 8;
+  const HIDE_THRESHOLD = 100; // Much higher to avoid premature hiding on initial scroll
+  const SHOW_THRESHOLD = 30; // Larger gap creates hysteresis, prevents jitter
+  let lastStateChange = 0;
+  const STATE_COOLDOWN_MS = 150; // Prevents rapid toggling
 
   list.addEventListener('scroll', () => {
     if (scrollTicking) return;
     scrollTicking = true;
     requestAnimationFrame(() => {
       const y = list.scrollTop;
-      if (!collapsed && y > HIDE_THRESHOLD) {
+      const now = Date.now();
+      const canToggle = (now - lastStateChange) > STATE_COOLDOWN_MS;
+
+      if (!collapsed && y > HIDE_THRESHOLD && canToggle) {
         header.classList.add('collapsed');
         stats.classList.add('collapsed');
         filterBar.classList.add('stuck');
         collapsed = true;
-      } else if (collapsed && y < SHOW_THRESHOLD) {
+        lastStateChange = now;
+      } else if (collapsed && y < SHOW_THRESHOLD && canToggle) {
         header.classList.remove('collapsed');
         stats.classList.remove('collapsed');
         filterBar.classList.remove('stuck');
         collapsed = false;
+        lastStateChange = now;
       }
       scrollTicking = false;
     });
@@ -342,10 +365,19 @@ function renderExtensions(results) {
 
   results.sort((a, b) => a.score - b.score);
 
+  // Create document fragment for batch rendering (prevents multiple reflows)
+  const fragment = document.createDocumentFragment();
+  
   results.forEach(ext => {
     const card = getExtensionCard(ext);
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+  
+  // Single DOM append - prevents incremental scrollbar resizing
+  container.appendChild(fragment);
+  
+  // Force synchronous layout calculation to stabilize scrollbar
+  container.offsetHeight;
 }
 
 function attachFilterControls() {
@@ -711,5 +743,255 @@ function scrollToFirstRisky() {
   setTimeout(() => {
     targetCard.classList.remove('glow-highlight');
   }, 6000);
+}
+
+/* ---------- Onboarding Tour ---------- */
+
+async function initializeOnboardingTour() {
+  const overlay = document.getElementById('tour-overlay');
+  const popover = document.getElementById('tour-popover');
+  tourCutout = document.getElementById('tour-cutout');
+  if (!overlay || !popover) {
+    console.warn('Tour UI missing; skipping onboarding tour');
+    return;
+  }
+
+  bindTourControls();
+  setupDevReset();
+
+  try {
+    const stored = await chrome.storage.local.get({ [TOUR_COMPLETED_KEY]: false });
+    const done = stored?.[TOUR_COMPLETED_KEY] === true;
+    if (done) return;
+    startTour();
+  } catch (err) {
+    console.error('Tour init failed', err);
+  }
+}
+
+function bindTourControls() {
+  const nextBtn = document.getElementById('tour-next');
+  const prevBtn = document.getElementById('tour-prev');
+  const skipBtn = document.getElementById('tour-skip');
+
+  if (nextBtn) nextBtn.addEventListener('click', () => advanceTour(1));
+  if (prevBtn) prevBtn.addEventListener('click', () => advanceTour(-1));
+  if (skipBtn) skipBtn.addEventListener('click', () => endTour({ markComplete: true }));
+}
+
+function startTour() {
+  const overlay = document.getElementById('tour-overlay');
+  const popover = document.getElementById('tour-popover');
+  if (!overlay || !popover) return;
+
+  tourState = { active: true, index: 0 };
+  overlay.classList.remove('hidden');
+  renderTourStep();
+}
+
+function endTour({ markComplete } = { markComplete: true }) {
+  const overlay = document.getElementById('tour-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+
+  tourState.active = false;
+
+  clearTourHighlight();
+
+  if (markComplete) {
+    chrome.storage.local
+      .set({ [TOUR_COMPLETED_KEY]: true })
+      .catch((err) => console.error('Tour completion save failed', err));
+  }
+}
+
+function advanceTour(delta) {
+  if (!tourState.active) return;
+
+  const nextIndex = tourState.index + delta;
+
+  if (nextIndex < 0) return;
+  if (nextIndex >= TOUR_STEPS.length) {
+    endTour({ markComplete: true });
+    return;
+  }
+
+  tourState.index = nextIndex;
+  renderTourStep();
+}
+
+function renderTourStep() {
+  const popover = document.getElementById('tour-popover');
+  const overlay = document.getElementById('tour-overlay');
+  const textEl = document.getElementById('tour-step-text');
+
+  if (!popover || !overlay || !textEl) return;
+
+  const step = TOUR_STEPS[tourState.index];
+  textEl.textContent = step?.text || '';
+
+  const target = step?.selector ? document.querySelector(step.selector) : null;
+  applyTourHighlight(target);
+  updateCutout(target);
+  positionTourPopover(target, popover, overlay);
+  updateTourButtons();
+}
+
+function positionTourPopover(target, popover, overlay) {
+  const padding = 12;
+  popover.style.transform = '';
+
+  if (target) {
+    const rect = target.getBoundingClientRect();
+    const overlayWidth = overlay.clientWidth || window.innerWidth;
+    const left = Math.max(padding, Math.min(rect.left, overlayWidth - popover.offsetWidth - padding));
+    const top = Math.max(padding, rect.bottom + 8);
+
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+    return;
+  }
+
+  popover.style.left = '50%';
+  popover.style.top = '50%';
+  popover.style.transform = 'translate(-50%, -50%)';
+}
+
+function applyTourHighlight(target) {
+  clearTourHighlight();
+
+  if (!target) return;
+
+  tourHighlightEl = target;
+  tourHighlightPrev = {
+    zIndex: target.style.zIndex,
+    position: target.style.position,
+    filter: target.style.filter
+  };
+
+  if (!target.style.position || target.style.position === 'static') {
+    target.style.position = 'relative';
+  }
+  target.style.zIndex = '13000';
+  target.style.filter = 'none';
+
+  const container = findStackingContext(target.parentElement);
+  if (container) {
+    tourHighlightContainer = container;
+    tourHighlightContainerPrev = {
+      zIndex: container.style.zIndex,
+      position: container.style.position
+    };
+
+    if (!container.style.position || container.style.position === 'static') {
+      container.style.position = 'relative';
+    }
+    container.style.zIndex = '12500';
+  }
+
+  tourHighlightEl.classList.add('tour-highlight');
+}
+
+function clearTourHighlight() {
+  if (!tourHighlightEl) return;
+
+  tourHighlightEl.classList.remove('tour-highlight');
+
+  if (tourHighlightPrev) {
+    tourHighlightEl.style.zIndex = tourHighlightPrev.zIndex || '';
+    tourHighlightEl.style.position = tourHighlightPrev.position || '';
+    tourHighlightEl.style.filter = tourHighlightPrev.filter || '';
+  }
+
+  if (tourHighlightContainer) {
+    if (tourHighlightContainerPrev) {
+      tourHighlightContainer.style.zIndex = tourHighlightContainerPrev.zIndex || '';
+      tourHighlightContainer.style.position = tourHighlightContainerPrev.position || '';
+    }
+    tourHighlightContainer = null;
+    tourHighlightContainerPrev = null;
+  }
+
+  tourHighlightEl = null;
+  tourHighlightPrev = null;
+
+  updateCutout(null);
+}
+
+function findStackingContext(el) {
+  let node = el;
+  while (node && node !== document.body) {
+    const style = getComputedStyle(node);
+    const positionCreates = ['relative', 'absolute', 'fixed', 'sticky'].includes(style.position);
+    const zSet = style.zIndex !== 'auto';
+    const transformSet = style.transform !== 'none' || style.filter !== 'none' || style.perspective !== 'none';
+    if (positionCreates && zSet) return node;
+    if (transformSet) return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function updateCutout(target) {
+  if (!tourCutout) return;
+  const backdrop = document.getElementById('tour-backdrop');
+
+  if (!target) {
+    tourCutout.classList.add('hidden');
+    tourCutout.style.width = '';
+    tourCutout.style.height = '';
+    tourCutout.style.left = '';
+    tourCutout.style.top = '';
+    if (backdrop) backdrop.classList.remove('no-blur');
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  const pad = 6;
+
+  tourCutout.classList.remove('hidden');
+  tourCutout.style.width = `${Math.max(0, rect.width + pad * 2)}px`;
+  tourCutout.style.height = `${Math.max(0, rect.height + pad * 2)}px`;
+  tourCutout.style.left = `${rect.left - pad}px`;
+  tourCutout.style.top = `${rect.top - pad}px`;
+
+  if (backdrop) {
+    if (target.id === 'scan-now') {
+      backdrop.classList.add('no-blur');
+    } else {
+      backdrop.classList.remove('no-blur');
+    }
+  }
+}
+
+function updateTourButtons() {
+  const prevBtn = document.getElementById('tour-prev');
+  const nextBtn = document.getElementById('tour-next');
+
+  if (!prevBtn || !nextBtn) return;
+
+  prevBtn.disabled = tourState.index === 0;
+  const isLast = tourState.index === TOUR_STEPS.length - 1;
+  nextBtn.textContent = isLast ? 'Done' : 'Next';
+}
+
+function setupDevReset() {
+  const resetBtn = document.getElementById('tour-reset');
+  if (!resetBtn) return;
+
+  const isDev = new URLSearchParams(location.search).get('dev') === '1';
+  if (!isDev) return;
+
+  resetBtn.classList.remove('hidden');
+  resetBtn.addEventListener('click', async () => {
+    try {
+      await chrome.storage.local.remove(TOUR_COMPLETED_KEY);
+      tourState = { active: false, index: 0 };
+      startTour();
+    } catch (err) {
+      console.error('Tour reset failed', err);
+    }
+  });
 }
 

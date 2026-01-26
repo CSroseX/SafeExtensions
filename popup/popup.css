@@ -17,24 +17,9 @@
 }
 
 /* ==================== ANIMATIONS ==================== */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-.extension-card {
-  animation: slideIn 0.3s ease-out;
 }
 
 /* ==================== RISK COLORS ==================== */
@@ -211,8 +196,13 @@
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: all 200ms;
-  animation: slideIn 0.3s ease-out;
+  transition: box-shadow 200ms, transform 200ms;
+  min-height: 140px; /* Fixed min-height prevents scrollbar resize */
+  opacity: 1;
+  transform: translateZ(0); /* Force GPU acceleration, prevent subpixel jitter */
+  overflow: hidden; /* Prevent content overflow */
+  word-wrap: break-word;
+  max-width: 100%;
 }
 
 .extension-card:hover {
@@ -308,6 +298,10 @@
   cursor: pointer;
   transition: color 200ms;
   text-decoration: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-view:hover {
@@ -453,6 +447,110 @@
 
 /* Visibility */
 .hidden { display: none; }
+
+/* ==================== ONBOARDING TOUR ==================== */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+.tour-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1px);
+  pointer-events: auto;
+  z-index: 9000;
+}
+
+.tour-backdrop.no-blur {
+  backdrop-filter: none;
+}
+
+.tour-cutout {
+  position: absolute;
+  pointer-events: none;
+  z-index: 11000;
+  box-shadow:
+    0 0 0 2000px rgba(0, 0, 0, 0.35),
+    0 0 0 3px rgba(59, 130, 246, 0.35);
+  border-radius: 12px;
+  transition: left 120ms ease, top 120ms ease, width 120ms ease, height 120ms ease;
+}
+
+.tour-popover {
+  position: absolute;
+  max-width: 280px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 12px 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  pointer-events: auto;
+  z-index: 12000;
+}
+
+.tour-text {
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.tour-actions #tour-prev {
+  margin-right: auto;
+}
+
+.tour-actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.tour-actions button:hover {
+  background: #e2e8f0;
+}
+
+.tour-actions .ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #475569;
+}
+
+.tour-reset {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 11px;
+  color: #475569;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.tour-reset:hover {
+  text-decoration: underline;
+}
+
+.tour-highlight {
+  position: relative;
+  z-index: 13000;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+  border-radius: 10px;
+  transition: box-shadow 150ms ease-in-out;
+  filter: none !important;
+}
 
 /* Min width / size */
 .min-w-0 { min-width: 0; }
@@ -646,6 +744,13 @@
   position: sticky;
   top: 0;
   z-index: 20;
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: box-shadow;
+}
+
+.filter-bar {
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: box-shadow;
 }
 
 .filter-bar.stuck {
@@ -654,19 +759,21 @@
 
 /* Collapsible sections (header, stats) */
 .collapsible-section {
-  transition: opacity 180ms ease, transform 180ms ease, max-height 220ms ease, padding 180ms ease, margin 180ms ease, border 180ms ease;
-  will-change: opacity, transform, max-height;
+  transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+  transform-origin: top center;
 }
 
 .collapsible-section.collapsed {
   opacity: 0;
-  transform: translateY(-8px);
-  max-height: 0;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-  border-bottom-color: transparent !important;
-  overflow: hidden;
+  transform: translateY(-16px) scaleY(0.95);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
 }
 
 /* ==================== GLOW EFFECT ==================== */

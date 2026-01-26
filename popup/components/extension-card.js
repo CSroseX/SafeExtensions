@@ -38,13 +38,16 @@ export function getExtensionCard(ext) {
       </div>
     ` : ''}
 
-    <div class="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
+    <div class="flex items-center justify-between pt-3 border-t border-slate-100 gap-2 flex-wrap">
       <button
         class="btn-view view-details-btn"
-        data-extension-id="${ext.extensionId}">
+        data-extension-id="${ext.extensionId}"
+        style="flex: 1 1 auto; min-width: fit-content; white-space: nowrap;">
         View Details →
       </button>
-      ${renderActionButtons(ext.extensionId, ext.enabled)}
+      <div style="flex: 0 0 auto; display: flex; gap: 8px;">
+        ${renderActionButtons(ext.extensionId, ext.enabled)}
+      </div>
     </div>
   `;
 

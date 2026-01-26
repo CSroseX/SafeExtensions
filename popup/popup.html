@@ -140,7 +140,6 @@
       </svg>
       <span>Export Privacy Report</span>
     </button>
-    <p class="text-xs text-slate-500 mt-2" style="text-align:center;">Store data is informational only.</p>
   </footer>
 
   <!-- Details Modal -->
@@ -173,6 +172,23 @@
 
   <!-- Toast Notification -->
   <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Onboarding Tour Overlay -->
+  <div id="tour-overlay" class="tour-overlay hidden" aria-live="polite">
+    <div id="tour-backdrop" class="tour-backdrop"></div>
+    <div id="tour-cutout" class="tour-cutout hidden"></div>
+    <div id="tour-popover" class="tour-popover">
+      <p id="tour-step-text" class="tour-text"></p>
+      <div class="tour-actions">
+        <button id="tour-prev" type="button">Previous</button>
+        <button id="tour-next" type="button">Next</button>
+        <button id="tour-skip" type="button" class="ghost">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dev-only reset (visible with ?dev=1) -->
+  <button id="tour-reset" class="tour-reset hidden" type="button" aria-live="polite">Reset tour (dev)</button>
 
   <script type="module" src="./popup.js"></script>
 </body>

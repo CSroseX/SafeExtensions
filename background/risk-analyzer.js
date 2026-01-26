@@ -184,6 +184,151 @@ async function analyzeTrackerContacts(hostPermissions, risks, score) {
   return score;
 }
 
+function analyzeCSP(extension, risks, score) {
+  const manifest = extension.manifest;
+  
+  if (!manifest) return score;
+  
+  // MV3 uses different CSP structure than MV2
+  let csp = null;
+  
+  // MV3: content_security_policy is an object with extension_pages
+  if (manifest.content_security_policy && typeof manifest.content_security_policy === 'object') {
+    csp = manifest.content_security_policy.extension_pages || manifest.content_security_policy.sandbox;
+  }
+  // MV2: content_security_policy is a string
+  else if (typeof manifest.content_security_policy === 'string') {
+    csp = manifest.content_security_policy;
+  }
+  
+  if (!csp) return score;
+  
+  const cspLower = csp.toLowerCase();
+  
+  // Check for unsafe-inline (allows inline scripts - XSS risk)
+  if (cspLower.includes('unsafe-inline')) {
+    score -= 2;
+    risks.push({
+      severity: 'high',
+      title: 'Unsafe Content Security Policy: unsafe-inline',
+      description: 'Allows inline scripts which can enable XSS attacks and arbitrary code execution.',
+      type: 'csp'
+    });
+  }
+  
+  // Check for unsafe-eval (allows eval() - code injection risk)
+  if (cspLower.includes('unsafe-eval')) {
+    score -= 2;
+    risks.push({
+      severity: 'high',
+      title: 'Unsafe Content Security Policy: unsafe-eval',
+      description: 'Allows dynamic code evaluation (eval), which can execute arbitrary code.',
+      type: 'csp'
+    });
+  }
+  
+  // Check for overly permissive script-src with wildcards
+  const scriptSrcMatch = cspLower.match(/script-src[^;]*/i);
+  if (scriptSrcMatch) {
+    const scriptSrc = scriptSrcMatch[0];
+    
+    // Check for wildcard sources like 'script-src *', http://* or https://*
+    if (
+      scriptSrc.includes("'self' *") ||
+      scriptSrc.includes("* 'self'") ||
+      scriptSrc.includes('*') ||
+      scriptSrc.match(/\bhttp:\/\/\*/) ||
+      scriptSrc.match(/\bhttps:\/\/\*/)
+    ) {
+      score -= 1;
+      risks.push({
+        severity: 'medium',
+        title: 'Permissive script sources in CSP',
+        description: 'Allows loading scripts from any domain, which could load malicious code.',
+        type: 'csp'
+      });
+    }
+
+    // Flag external script sources (non-self) even without wildcards
+    const allowsExternal = /script-src[^;]*https?:\/\//.test(scriptSrc) && !/script-src[^;]*https?:\/\/localhost/.test(scriptSrc);
+    if (allowsExternal) {
+      score -= 1;
+      risks.push({
+        severity: 'medium',
+        title: 'Loads scripts from external domains',
+        description: 'CSP allows scripts from external domains, increasing supply-chain risk.',
+        type: 'csp'
+      });
+    }
+  }
+  
+  return score;
+}
+
+function analyzeUpdateURL(extension, risks, score) {
+  // manifest may be missing; default to empty object
+  const manifest = extension.manifest || {};
+  
+  // chrome.management exposes updateUrl (camelCase); manifest uses update_url
+  const updateURL = manifest.update_url || extension.updateUrl || extension.update_url;
+  
+  // No update URL typically means Chrome Web Store auto-update; skip
+  if (!updateURL) return score;
+  
+  const updateURLLower = updateURL.toLowerCase();
+  
+  // Chrome Web Store official update URLs
+  const isOfficialStore = updateURLLower.includes('clients2.google.com') ||
+                          updateURLLower.includes('clients2.googleusercontent.com') ||
+                          updateURLLower.includes('update.googleapis.com');
+  
+  if (!isOfficialStore) {
+    score -= 2;
+    risks.push({
+      severity: 'high',
+      title: 'Updates from non-official source',
+      description: `Extension updates from: ${updateURL.substring(0, 60)}${updateURL.length > 60 ? '...' : ''}`,
+      type: 'update'
+    });
+  }
+  
+  // Check for HTTP (unencrypted) update URL - CRITICAL security risk
+  if (updateURL.startsWith('http://')) {
+    score -= 3;
+    risks.push({
+      severity: 'critical',
+      title: 'Insecure update mechanism (HTTP)',
+      description: 'Updates over unencrypted HTTP - vulnerable to man-in-the-middle attacks that could inject malware.',
+      type: 'update'
+    });
+  }
+  
+  // Check for suspicious domains in update URL
+  const suspiciousDomains = [
+    'temp-mail',
+    'file-sharing',
+    'free-host',
+    'pastebin',
+    'githubusercontent.com/raw', // Raw GitHub files (not releases)
+  ];
+  
+  const hasSuspiciousDomain = suspiciousDomains.some(domain => 
+    updateURLLower.includes(domain)
+  );
+  
+  if (hasSuspiciousDomain) {
+    score -= 1;
+    risks.push({
+      severity: 'medium',
+      title: 'Updates from suspicious hosting',
+      description: 'Update URL points to temporary or unconventional hosting service.',
+      type: 'update'
+    });
+  }
+  
+  return score;
+}
+
 export async function analyzeRisk(extension) {
   let score = BASE_SCORE;
   const risks = [];
@@ -213,6 +358,12 @@ export async function analyzeRisk(extension) {
 
   // Tracker domain contacts based on host permissions
   score = await analyzeTrackerContacts(hostPermissions, risks, score);
+
+  // Content Security Policy analysis
+  score = analyzeCSP(extension, risks, score);
+
+  // Update URL analysis
+  score = analyzeUpdateURL(extension, risks, score);
 
   score = Math.max(0, score);
 

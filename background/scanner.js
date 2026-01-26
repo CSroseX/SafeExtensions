@@ -61,7 +61,12 @@ export async function scanExtensions() {
             daysSinceInstall
           };
 
-          const analysis = await analyzeRisk({ ...ext, ...metadata });
+          // Pass full extension object including manifest to analyzer
+          const analysis = await analyzeRisk({ 
+            ...ext, 
+            ...metadata,
+            manifest: ext // The ext object contains manifest data from chrome.management API
+          });
 
           const scanData = {
             extensionId: ext.id,

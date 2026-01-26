@@ -1,5 +1,11 @@
 # SafeExtensions
-<img src="https://img.shields.io/badge/JavaScript-ES2021-F7DF1E?logo=javascript&logoColor=000&style=for-the-badge"/> <img src="https://img.shields.io/badge/Chrome%20Extension-MV3-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge"/> <img src="https://img.shields.io/badge/Privacy-Local%20Only-0F766E?logo=torbrowser&logoColor=white&style=for-the-badge"/> <img src="https://img.shields.io/badge/Security-Risk%20Scanner-111827?logo=shield&logoColor=white&style=for-the-badge"/> <img src="https://img.shields.io/badge/IndexedDB-Storage-4B5563?style=for-the-badge"/> <img src="https://img.shields.io/badge/HTML-CSS-E34F26?logo=html5&logoColor=white&style=for-the-badge"/> <img src="https://img.shields.io/badge/Notifications-Enabled-2563EB?style=for-the-badge"/>
+[![JavaScript ES2021](https://img.shields.io/badge/JavaScript-ES2021-F7DF1E.svg?logo=javascript&logoColor=000)](https://developer.mozilla.org/docs/Web/JavaScript)
+[![Chrome Extension MV3](https://img.shields.io/badge/Chrome%20Extension-MV3-4285F4.svg?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
+[![Privacy Local Only](https://img.shields.io/badge/Privacy-Local%20Only-0F766E.svg)](docs/PRIVACY_POLICY.md)
+[![Security Risk Scanner](https://img.shields.io/badge/Security-Risk%20Scanner-111827.svg)](docs/RISK_ANALYZER_DOCUMENTATION.md)
+[![IndexedDB Storage](https://img.shields.io/badge/IndexedDB-Storage-4B5563.svg)](https://developer.mozilla.org/docs/Web/API/IndexedDB_API)
+[![HTML/CSS](https://img.shields.io/badge/HTML-CSS-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/docs/Web/HTML)
+[![Notifications API](https://img.shields.io/badge/Notifications-Enabled-2563EB.svg)](https://developer.chrome.com/docs/extensions/reference/notifications/)
 
 SafeExtensions scans installed Chrome extensions locally to surface privacy risks. All analysis stays on-device with transparent, deterministic logic.
 

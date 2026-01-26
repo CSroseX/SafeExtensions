@@ -35,5 +35,7 @@ See docs/CONTRIBUTING.md for guidelines focused on privacy-first, readable, audi
 
 ---
 This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE).
+
 Contributing: see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
 Contact: chitransh.saxena.contact@gmail.com

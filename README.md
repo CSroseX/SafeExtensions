@@ -25,7 +25,7 @@ SafeExtensions scans installed Chrome extensions locally to surface privacy risk
 - Store listing assets and release automation
 - Optional TypeScript and linting/formatting configs
 
-## Privacy
+## What makes SafeExtension safer than others?
 - No telemetry: nothing is tracked or sent anywhere
 - No remote calls: works fully offline
 - 100% local analysis & storage: all data stays on your device

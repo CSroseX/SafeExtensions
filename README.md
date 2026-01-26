@@ -5,7 +5,7 @@
 [![Security Risk Scanner](https://img.shields.io/badge/Security-Risk%20Scanner-111827.svg)](docs/RISK_ANALYZER_DOCUMENTATION.md)
 [![IndexedDB Storage](https://img.shields.io/badge/IndexedDB-Storage-4B5563.svg)](https://developer.mozilla.org/docs/Web/API/IndexedDB_API)
 [![HTML/CSS](https://img.shields.io/badge/HTML-CSS-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/docs/Web/HTML)
-[![Notifications API](https://img.shields.io/badge/Notifications-Enabled-2563EB.svg)](https://developer.chrome.com/docs/extensions/reference/notifications/)
+
 
 SafeExtensions scans installed Chrome extensions locally to surface privacy risks. All analysis stays on-device with transparent, deterministic logic.
 

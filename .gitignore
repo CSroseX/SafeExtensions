@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 test-extensions/
 docs/PROJECT_FUNCTIONALITY.md
+docs/PROJECT_DETAILS.md

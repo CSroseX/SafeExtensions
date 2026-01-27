@@ -43,3 +43,4 @@ Want to contribute? see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guideli
 This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE).
 
 Contact: chitransh.saxena.contact@gmail.com
+

@@ -1,0 +1,51 @@
+{
+  "name": "safe-extensions",
+  "version": "1.0.0",
+  "description": "Privacy-first Chrome extension scanner and analyzer",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node tests/run-tests.js",
+    "validate": "node tests/validate-json.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CSroseX/SafeExtensions.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "privacy",
+    "security",
+    "extension-scanner"
+  ],
+  "author": "Chitransh Saxena <chitransh.saxena.contact@gmail.com>",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "webextensions": true,
+      "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "no-console": "off",
+      "semi": ["error", "always"],
+      "quotes": ["error", "single", { "avoidEscape": true }]
+    },
+    "ignorePatterns": [
+      "node_modules/",
+      "dist/",
+      "*.min.js"
+    ]
+  }
+}

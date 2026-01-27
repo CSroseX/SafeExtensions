@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 // Debounced state change handler to avoid rapid double rescans
 let stateChangeTimeout;
-const debounceScanAndNotify = (label) => {
+const debounceScanAndNotify = (_label) => {
   clearTimeout(stateChangeTimeout);
   stateChangeTimeout = setTimeout(async () => {
     try {
@@ -50,11 +50,11 @@ chrome.management.onDisabled.addListener(async (info) => {
   debounceScanAndNotify('onDisabled');
 });
 
-chrome.management.onInstalled.addListener(async (info) => {
+chrome.management.onInstalled.addListener(async (_info) => {
   debounceScanAndNotify('onInstalled');
 });
 
-chrome.management.onUninstalled.addListener(async (id) => {
+chrome.management.onUninstalled.addListener(async (_id) => {
   debounceScanAndNotify('onUninstalled');
 });
 

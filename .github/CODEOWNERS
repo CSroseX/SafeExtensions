@@ -1,0 +1,26 @@
+# CODEOWNERS
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @CSroseX
+
+# Security and privacy critical areas
+/background/risk-analyzer.js @CSroseX
+/background/scanner.js @CSroseX
+/data/risk-patterns.json @CSroseX
+/data/tracker-domains.json @CSroseX
+
+# Extension manifest and permissions
+/manifest.json @CSroseX
+
+# Core libraries
+/libs/chrome-api.js @CSroseX
+/libs/tracker-db.js @CSroseX
+
+# Documentation and community files
+/CODE_OF_CONDUCT.md @CSroseX
+/docs/CONTRIBUTING.md @CSroseX
+/docs/PRIVACY_POLICY.md @CSroseX
+
+# CI/CD workflows
+/.github/ @CSroseX

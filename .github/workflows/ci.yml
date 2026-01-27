@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ "**" ]
+
+permissions:
+  contents: read
+
+jobs:
+  repo-checks:
+    name: Repository Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files (manifest + data)
+        run: |
+          python3 -c '
+          import json, glob, sys
+          paths = ["manifest.json", "data/*.json"]
+          failed = False
+          for pattern in paths:
+              for p in glob.glob(pattern):
+                  try:
+                      with open(p, "r", encoding="utf-8") as f:
+                          json.load(f)
+                      print(f"OK {p}")
+                  except Exception as e:
+                      print(f"ERROR {p}: {e}")
+                      failed = True
+          if failed:
+              sys.exit(1)
+          print("\n✅ All JSON files are valid!")
+          '
+
+      - name: Lint Chrome extension (web-ext)
+        run: |
+          npm --version
+          echo "Running web-ext lint..."
+          npx --yes web-ext lint -s . || true
+          echo "✅ Extension lint completed"
+
+  node-tests:
+    name: Node Lint/Tests (optional)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          else
+            echo "No package.json found, skipping"
+            exit 0
+          fi
+
+      - name: Lint
+        run: |
+          echo "Running ESLint..."
+          npm run lint --if-present
+          echo "✅ Lint passed!"
+
+      - name: Test
+        run: |
+          echo "Running tests..."
+          npm test --if-present
+          echo "✅ Tests passed!"

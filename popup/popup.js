@@ -92,10 +92,11 @@ function hasBroadHostAccess(ext) {
   return hosts.some(p => p === '<all_urls>' || p === '*://*/*' || p === 'http://*/*' || p === 'https://*/*');
 }
 
-function hasAnyAccess(ext) {
-  const hosts = ext.hostPermissions || [];
-  return hosts.length > 0;
-}
+// Removed unused function - kept for potential future use
+// function hasAnyAccess(ext) {
+//   const hosts = ext.hostPermissions || [];
+//   return hosts.length > 0;
+// }
 
 function updateTabCounts(results) {
   const allCount = results.length || 0;
@@ -187,6 +188,13 @@ function applyFilterAndSort() {
   }
 }
 
+// Modal control functions (declared early for event listeners)
+window.closeDetailsModal = () => {
+  const modal = document.getElementById('details-modal');
+  modal.classList.remove('show');
+  modal.style.display = 'none';
+};
+
 function attachListeners() {
   document.getElementById('scan-now').addEventListener('click', async () => {
     showLoading(true);
@@ -212,14 +220,14 @@ function attachListeners() {
 
   // Close modal buttons
   document.querySelectorAll('[data-close-modal]').forEach((btn) => {
-    btn.addEventListener('click', closeDetailsModal);
+    btn.addEventListener('click', window.closeDetailsModal);
   });
 
   // Click outside modal content closes modal
   const modalOverlay = document.getElementById('details-modal');
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) {
-      closeDetailsModal();
+      window.closeDetailsModal();
     }
   });
 }
@@ -581,7 +589,7 @@ window.viewDetails = async (extensionId) => {
                 <div class="flex-1">
                   <p class="text-sm font-medium text-slate-800">${r.title}</p>
                   ${r.description ? `<p class="text-xs text-slate-600 mt-0.5">${r.description}</p>` : ''}
-                  ${r.type === 'reputation' ? `<span class="text-xs text-slate-400" title="Low rating < 3.0 or few reviews < 10 may indicate poor quality or newness.">ⓘ</span>` : ''}
+                  ${r.type === 'reputation' ? '<span class="text-xs text-slate-400" title="Low rating < 3.0 or few reviews < 10 may indicate poor quality or newness.">ⓘ</span>' : ''}
                 </div>
               </div>
             `).join('')}
@@ -597,12 +605,6 @@ window.viewDetails = async (extensionId) => {
 
   document.getElementById('details-modal').classList.add('show');
   document.getElementById('details-modal').style.display = 'flex';
-};
-
-window.closeDetailsModal = () => {
-  const modal = document.getElementById('details-modal');
-  modal.classList.remove('show');
-  modal.style.display = 'none';
 };
 
 /* ---------- Global Actions ---------- */
@@ -629,7 +631,7 @@ window.enableExtension = async (extensionId) => {
         reject(new Error('Rescan timeout'));
       }, 5000); // 5 second timeout
 
-      chrome.runtime.sendMessage({ action: 'rescan' }, (response) => {
+      chrome.runtime.sendMessage({ action: 'rescan' }, (_response) => {
         clearTimeout(timeout);
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
@@ -679,7 +681,7 @@ window.disableExtension = async (extensionId) => {
         reject(new Error('Rescan timeout'));
       }, 5000); // 5 second timeout
 
-      chrome.runtime.sendMessage({ action: 'rescan' }, (response) => {
+      chrome.runtime.sendMessage({ action: 'rescan' }, (_response) => {
         clearTimeout(timeout);
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
@@ -731,7 +733,7 @@ window.uninstallExtension = async (extensionId) => {
         reject(new Error('Rescan timeout'));
       }, 5000);
 
-      chrome.runtime.sendMessage({ action: 'rescan' }, (response) => {
+      chrome.runtime.sendMessage({ action: 'rescan' }, (_response) => {
         clearTimeout(timeout);
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);

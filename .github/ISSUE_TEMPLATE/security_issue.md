@@ -7,6 +7,7 @@ assignees: ''
 ---
 
 ## ⚠️ Security Advisory Notice
+⚠️ DO NOT disclose sensitive vulnerabilities publicly. Public issues may be closed without discussion.
 
 **For sensitive vulnerabilities, please report privately:**
 

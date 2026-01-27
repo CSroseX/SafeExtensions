@@ -33,3 +33,12 @@ Any other relevant information about the problem.
 
 ## Privacy & Security Impact
 Does this bug affect privacy or security? If yes, please describe.
+
+**Please note**: features that introduce telemetry, remote calls, or user tracking will not be accepted.
+
+
+## Checklist
+- [ ] I searched existing issues
+- [ ] This issue occurs on the latest version
+- [ ] I understand SafeExtensions runs 100% locally
+

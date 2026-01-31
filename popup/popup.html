@@ -29,8 +29,15 @@
           </button>
         </div>
       </div>
-      <div class="flex justify-end">
-        <a href="" class="text-xs text-slate-500 hover:text-slate-700 transition-colors">About</a>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+        <button id="disclaimer-btn" class="text-slate-500 hover:text-slate-700 transition-colors" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="text-xs">Disclaimer</span>
+        </button>
+        <a href="https://safe-extensions.netlify.app/" target="_blank" class="text-xs text-slate-500 hover:text-slate-700 transition-colors">About</a>
+        <a href="https://github.com/CSroseX/SafeExtensions/blob/main/docs/PRIVACY_POLICY.md" target="_blank" class="text-xs text-slate-500 hover:text-slate-700 transition-colors">Privacy Policy</a>
       </div>
     </div>
   </header>
@@ -163,6 +170,74 @@
       <div class="mt-6 pt-4 border-t border-slate-200 flex gap-2">
         <button type="button" data-close-modal class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-colors">
           Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer Modal -->
+  <div id="disclaimer-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-6">
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-slate-800">Important Disclaimer</h2>
+          <p class="text-sm text-slate-500 mt-1">Please read carefully</p>
+        </div>
+        <button type="button" data-close-disclaimer class="modal-close-btn">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Content -->
+      <div class="space-y-4">
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex gap-3">
+            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p class="text-sm font-semibold text-amber-900 mb-2">This is NOT a virus or malware scanner</p>
+              <p class="text-sm text-amber-800">SafeExtensions is a privacy analysis tool that helps you understand the permissions and potential privacy risks of your installed Chrome extensions.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-3 text-sm text-slate-700">
+          <div>
+            <h3 class="font-semibold text-slate-800 mb-1">What this tool does:</h3>
+            <ul class="list-disc list-inside space-y-1 ml-2 text-slate-600">
+              <li>Analyzes extension permissions and access patterns</li>
+              <li>Identifies potential privacy risks based on permission combinations</li>
+              <li>Provides transparency about what your extensions can access</li>
+              <li>Helps you make informed decisions about your extensions</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold text-slate-800 mb-1">What this tool does NOT do:</h3>
+            <ul class="list-disc list-inside space-y-1 ml-2 text-slate-600">
+              <li>Scan for viruses, malware, or malicious code</li>
+              <li>Guarantee the safety or security of any extension</li>
+              <li>Replace antivirus or security software</li>
+              <li>Monitor real-time extension behavior</li>
+            </ul>
+          </div>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+            <p class="text-sm text-blue-900">
+              <strong>Note:</strong> A "risky" rating indicates that an extension has broad permissions that <em>could</em> be misused. This doesn't mean the extension is malicious. Always install extensions from trusted developers and the official Chrome Web Store.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="mt-6 pt-4 border-t border-slate-200 flex gap-2">
+        <button type="button" data-close-disclaimer class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium text-sm transition-colors">
+          I Understand
         </button>
       </div>
     </div>

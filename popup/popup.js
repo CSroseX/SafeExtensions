@@ -195,6 +195,22 @@ window.closeDetailsModal = () => {
   modal.style.display = 'none';
 };
 
+function openDisclaimerModal() {
+  const modal = document.getElementById('disclaimer-modal');
+  if (modal) {
+    modal.classList.add('show');
+    modal.style.display = 'flex';
+  }
+}
+
+function closeDisclaimerModal() {
+  const modal = document.getElementById('disclaimer-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+}
+
 function attachListeners() {
   document.getElementById('scan-now').addEventListener('click', async () => {
     showLoading(true);
@@ -230,6 +246,25 @@ function attachListeners() {
       window.closeDetailsModal();
     }
   });
+
+  // Disclaimer modal handlers
+  const disclaimerBtn = document.getElementById('disclaimer-btn');
+  if (disclaimerBtn) {
+    disclaimerBtn.addEventListener('click', openDisclaimerModal);
+  }
+
+  document.querySelectorAll('[data-close-disclaimer]').forEach((btn) => {
+    btn.addEventListener('click', closeDisclaimerModal);
+  });
+
+  const disclaimerModalOverlay = document.getElementById('disclaimer-modal');
+  if (disclaimerModalOverlay) {
+    disclaimerModalOverlay.addEventListener('click', (e) => {
+      if (e.target === disclaimerModalOverlay) {
+        closeDisclaimerModal();
+      }
+    });
+  }
 }
 
 function attachDelegatedActions() {

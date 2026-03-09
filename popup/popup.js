@@ -31,9 +31,17 @@ let scrollTicking = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // CRITICAL: Force a fresh scan from the background to sync with Chrome's latest extension state
-  console.log('📂 Popup opened - requesting fresh scan from background...');
-  chrome.runtime.sendMessage({ action: 'rescan' }, async (response) => {
-    console.log('✅ Background scan complete:', response);
+  chrome.runtime.sendMessage({ action: 'rescan' }, async (_response) => {
+    if (chrome.runtime.lastError) {
+      await loadAndDisplay();
+      attachListeners();
+      attachDelegatedActions();
+      attachScrollBehavior();
+      initializeOnboardingTour();
+      showToast('Unable to sync with background scan. Showing last saved results.', 'error');
+      return;
+    }
+
     await loadAndDisplay();
     attachListeners();
     attachDelegatedActions();
@@ -215,8 +223,13 @@ function attachListeners() {
   document.getElementById('scan-now').addEventListener('click', async () => {
     showLoading(true);
 
-    chrome.runtime.sendMessage({ action: 'rescan' }, async () => {
+    chrome.runtime.sendMessage({ action: 'rescan' }, async (response) => {
       try {
+        if (chrome.runtime.lastError || response?.success === false) {
+          const message = response?.error || chrome.runtime.lastError?.message || 'Scan failed';
+          showToast(`Scan failed: ${message}`, 'error');
+          return;
+        }
         await loadAndDisplay({ showCompleteToast: true, skipLoading: true });
       } finally {
         showLoading(false);
@@ -559,6 +572,24 @@ function showToast(message, variant = 'info') {
 
 // Update modal display
 
+function safeSeverityClass(severity) {
+  const allowed = new Set(['critical', 'high', 'medium', 'low']);
+  return allowed.has(severity) ? severity : 'low';
+}
+
+function createElement(tag, className, text) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+
+function createModalSection(titleText) {
+  const section = createElement('div', 'modal-section');
+  section.appendChild(createElement('div', 'modal-section-title', titleText));
+  return section;
+}
+
 
 /* ---------- Global Actions ---------- */
 
@@ -568,96 +599,130 @@ window.viewDetails = async (extensionId) => {
   if (!ext) return;
 
   const riskLevel = ext.score >= 7 ? 'safe' : ext.score >= 5 ? 'medium' : ext.score >= 3 ? 'high' : 'critical';
+  const safeStoreUrl = buildStoreUrl(ext.name, ext.extensionId);
 
-  document.getElementById('modal-title').textContent = ext.name;
-  document.getElementById('modal-content').innerHTML = `
-    <div class="space-y-4">
-      <!-- Score Section -->
-      <div class="modal-section">
-        <div class="modal-section-title">Privacy Score</div>
-        <div class="flex items-center justify-between">
-          <span class="text-2xl font-bold ${riskLevel === 'critical' ? 'text-red-600' : riskLevel === 'high' ? 'text-orange-600' : riskLevel === 'medium' ? 'text-blue-600' : 'text-emerald-600'}">${ext.score}/10</span>
-          <span class="score-badge ${riskLevel}">${ext.score >= 7 ? 'Safe' : ext.score >= 5 ? 'Caution' : 'Risky'}</span>
-        </div>
-      </div>
+  const modalTitle = document.getElementById('modal-title');
+  const modalContent = document.getElementById('modal-content');
+  modalTitle.textContent = ext.name || '';
+  modalContent.replaceChildren();
 
-      <!-- Version -->
-      <div class="modal-section">
-        <div class="modal-section-title">Version</div>
-        <p class="text-sm text-slate-700">${ext.version}</p>
-      </div>
+  const root = createElement('div', 'space-y-4');
 
-      <!-- Chrome Web Store Link -->
-      ${buildStoreUrl(ext.name, ext.extensionId) ? `
-        <div class="modal-section">
-          <div class="modal-section-title">Store Page</div>
-          <a class="text-sm text-blue-600 hover:text-blue-700" href="${buildStoreUrl(ext.name, ext.extensionId)}" target="_blank" rel="noopener noreferrer">Open on Chrome Web Store →</a>
-          <p class="text-xs text-slate-500 mt-1">Store data is informational only.</p>
-        </div>
-      ` : ''}
+  const scoreSection = createModalSection('Privacy Score');
+  const scoreRow = createElement('div', 'flex items-center justify-between');
+  const scoreValueClass = riskLevel === 'critical'
+    ? 'text-red-600'
+    : riskLevel === 'high'
+      ? 'text-orange-600'
+      : riskLevel === 'medium'
+        ? 'text-blue-600'
+        : 'text-emerald-600';
+  const scoreValue = createElement('span', `text-2xl font-bold ${scoreValueClass}`, `${ext.score}/10`);
+  const scoreBadge = createElement('span', `score-badge ${riskLevel}`, ext.score >= 7 ? 'Safe' : ext.score >= 5 ? 'Caution' : 'Risky');
+  scoreRow.appendChild(scoreValue);
+  scoreRow.appendChild(scoreBadge);
+  scoreSection.appendChild(scoreRow);
+  root.appendChild(scoreSection);
 
-      <!-- Permissions -->
-      ${ext.permissions && ext.permissions.length > 0 ? `
-        <div class="modal-section">
-          <div class="modal-section-title">Permissions (${ext.permissions.length})</div>
-          <div class="space-y-1 max-h-32 overflow-y-auto">
-            ${ext.permissions.map(p => `
-              <div class="flex items-center gap-2 text-sm text-slate-600">
-                <span class="text-blue-500">•</span>
-                <span>${p}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
+  const versionSection = createModalSection('Version');
+  versionSection.appendChild(createElement('p', 'text-sm text-slate-700', ext.version || ''));
+  root.appendChild(versionSection);
 
-      <!-- Host Permissions -->
-      ${ext.hostPermissions && ext.hostPermissions.length > 0 ? `
-        <div class="modal-section">
-          <div class="modal-section-title flex items-center gap-2">
-            <span>Host Permissions (${ext.hostPermissions.length})</span>
-            ${hasBroadHostAccess(ext) ? '<span class="pill pill-warning" title="Has access to all sites via host permissions like <all_urls>">Broad access</span>' : ''}
-          </div>
-          <div class="space-y-1 max-h-32 overflow-y-auto">
-            ${ext.hostPermissions.map(p => `
-              <div class="flex items-center gap-2 text-sm text-slate-600">
-                <span class="text-amber-500">•</span>
-                <span title="${p === '<all_urls>' ? 'Has access to all websites' : ''}">${p}</span>
-              </div>
-            `).join('')}
-            ${hasBroadHostAccess(ext) ? `
-              <p class="text-xs text-amber-600 mt-2" style="line-height:1.4;">
-                This extension can access every site you visit (<all_urls>). It may read or modify content on any page, including banking or email.
-              </p>
-            ` : ''}
-          </div>
-        </div>
-      ` : ''}
+  if (safeStoreUrl) {
+    const storeSection = createModalSection('Store Page');
+    const link = createElement('a', 'text-sm text-blue-600 hover:text-blue-700', 'Open on Chrome Web Store →');
+    link.href = safeStoreUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    storeSection.appendChild(link);
+    storeSection.appendChild(createElement('p', 'text-xs text-slate-500 mt-1', 'Store data is informational only.'));
+    root.appendChild(storeSection);
+  }
 
-      <!-- Risks -->
-      ${ext.risks && ext.risks.length > 0 ? `
-        <div class="modal-section">
-          <div class="modal-section-title">Detected Risks (${ext.risks.length})</div>
-          <div class="space-y-2">
-            ${ext.risks.map(r => `
-              <div class="risk-indicator ${r.severity}">
-                <span>${r.severity === 'critical' ? '🚨' : r.severity === 'high' ? '⚠️' : '⚡'}</span>
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-slate-800">${r.title}</p>
-                  ${r.description ? `<p class="text-xs text-slate-600 mt-0.5">${r.description}</p>` : ''}
-                  ${r.type === 'reputation' ? '<span class="text-xs text-slate-400" title="Low rating < 3.0 or few reviews < 10 may indicate poor quality or newness.">ⓘ</span>' : ''}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : `
-        <div class="modal-section">
-          <p class="text-sm text-slate-600">✅ No major risks detected</p>
-        </div>
-      `}
-    </div>
-  `;
+  if (ext.permissions && ext.permissions.length > 0) {
+    const permSection = createModalSection(`Permissions (${ext.permissions.length})`);
+    const list = createElement('div', 'space-y-1 max-h-32 overflow-y-auto');
+    ext.permissions.forEach((permission) => {
+      const row = createElement('div', 'flex items-center gap-2 text-sm text-slate-600');
+      row.appendChild(createElement('span', 'text-blue-500', '•'));
+      row.appendChild(createElement('span', '', permission));
+      list.appendChild(row);
+    });
+    permSection.appendChild(list);
+    root.appendChild(permSection);
+  }
+
+  if (ext.hostPermissions && ext.hostPermissions.length > 0) {
+    const hostSection = createElement('div', 'modal-section');
+    const hostTitle = createElement('div', 'modal-section-title flex items-center gap-2');
+    hostTitle.appendChild(createElement('span', '', `Host Permissions (${ext.hostPermissions.length})`));
+    if (hasBroadHostAccess(ext)) {
+      const broad = createElement('span', 'pill pill-warning', 'Broad access');
+      broad.title = 'Has access to all sites via host permissions like <all_urls>';
+      hostTitle.appendChild(broad);
+    }
+    hostSection.appendChild(hostTitle);
+
+    const hostList = createElement('div', 'space-y-1 max-h-32 overflow-y-auto');
+    ext.hostPermissions.forEach((hostPermission) => {
+      const row = createElement('div', 'flex items-center gap-2 text-sm text-slate-600');
+      row.appendChild(createElement('span', 'text-amber-500', '•'));
+      const text = createElement('span', '', hostPermission);
+      if (hostPermission === '<all_urls>') {
+        text.title = 'Has access to all websites';
+      }
+      row.appendChild(text);
+      hostList.appendChild(row);
+    });
+
+    if (hasBroadHostAccess(ext)) {
+      const note = createElement(
+        'p',
+        'text-xs text-amber-600 mt-2',
+        'This extension can access every site you visit (<all_urls>). It may read or modify content on any page, including banking or email.'
+      );
+      note.style.lineHeight = '1.4';
+      hostList.appendChild(note);
+    }
+
+    hostSection.appendChild(hostList);
+    root.appendChild(hostSection);
+  }
+
+  if (ext.risks && ext.risks.length > 0) {
+    const riskSection = createModalSection(`Detected Risks (${ext.risks.length})`);
+    const riskList = createElement('div', 'space-y-2');
+
+    ext.risks.forEach((risk) => {
+      const riskRow = createElement('div', `risk-indicator ${safeSeverityClass(risk.severity)}`);
+      const riskIcon = createElement('span', '', risk.severity === 'critical' ? '🚨' : risk.severity === 'high' ? '⚠️' : '⚡');
+      const body = createElement('div', 'flex-1');
+      body.appendChild(createElement('p', 'text-sm font-medium text-slate-800', risk.title || ''));
+
+      if (risk.description) {
+        body.appendChild(createElement('p', 'text-xs text-slate-600 mt-0.5', risk.description));
+      }
+
+      if (risk.type === 'reputation') {
+        const info = createElement('span', 'text-xs text-slate-400', 'ⓘ');
+        info.title = 'Low rating < 3.0 or few reviews < 10 may indicate poor quality or newness.';
+        body.appendChild(info);
+      }
+
+      riskRow.appendChild(riskIcon);
+      riskRow.appendChild(body);
+      riskList.appendChild(riskRow);
+    });
+
+    riskSection.appendChild(riskList);
+    root.appendChild(riskSection);
+  } else {
+    const noRiskSection = createElement('div', 'modal-section');
+    noRiskSection.appendChild(createElement('p', 'text-sm text-slate-600', '✅ No major risks detected'));
+    root.appendChild(noRiskSection);
+  }
+
+  modalContent.appendChild(root);
 
   document.getElementById('details-modal').classList.add('show');
   document.getElementById('details-modal').style.display = 'flex';
@@ -806,9 +871,8 @@ window.uninstallExtension = async (extensionId) => {
     await loadAndDisplay({ skipLoading: true });
     
     showToast('✅ Extension uninstalled', 'success');
-  } catch (error) {
-    console.log('❌ Uninstall cancelled or failed:', error);
-    // Don't show error toast (user may have cancelled)
+  } catch (_error) {
+    return;
   } finally {
     showLoading(false);
   }

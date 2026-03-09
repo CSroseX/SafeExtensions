@@ -1,27 +1,34 @@
 export function renderActionButtons(extensionId, isEnabled) {
-  const toggleSwitch = `
-    <div class="toggle-switch-container">
-      <input
-        type="checkbox"
-        id="toggle-${extensionId}"
-        class="toggle-switch-input toggle-disable-btn"
-        data-extension-id="${extensionId}"
-        ${isEnabled === true ? 'checked' : ''}
-        aria-label="Toggle extension"
-      />
-      <label for="toggle-${extensionId}" class="toggle-switch-label"></label>
-    </div>
-  `;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'flex gap-2 items-center';
 
-  return `
-    <div class="flex gap-2 items-center">
-      ${toggleSwitch}
-      <button
-        class="btn-uninstall uninstall-btn"
-        data-extension-id="${extensionId}"
-        title="Uninstall this extension">
-        Uninstall
-      </button>
-    </div>
-  `;
+  const toggleContainer = document.createElement('div');
+  toggleContainer.className = 'toggle-switch-container';
+
+  const toggleInput = document.createElement('input');
+  toggleInput.type = 'checkbox';
+  toggleInput.id = `toggle-${extensionId}`;
+  toggleInput.className = 'toggle-switch-input toggle-disable-btn';
+  toggleInput.dataset.extensionId = extensionId;
+  toggleInput.checked = isEnabled === true;
+  toggleInput.setAttribute('aria-label', 'Toggle extension');
+
+  const toggleLabel = document.createElement('label');
+  toggleLabel.className = 'toggle-switch-label';
+  toggleLabel.htmlFor = `toggle-${extensionId}`;
+
+  toggleContainer.appendChild(toggleInput);
+  toggleContainer.appendChild(toggleLabel);
+
+  const uninstallButton = document.createElement('button');
+  uninstallButton.className = 'btn-uninstall uninstall-btn';
+  uninstallButton.dataset.extensionId = extensionId;
+  uninstallButton.title = 'Uninstall this extension';
+  uninstallButton.type = 'button';
+  uninstallButton.textContent = 'Uninstall';
+
+  wrapper.appendChild(toggleContainer);
+  wrapper.appendChild(uninstallButton);
+
+  return wrapper;
 }

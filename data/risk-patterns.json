@@ -1,5 +1,20 @@
 {
-  "suspiciousUrls": [],
-  "suspiciousKeywords": [],
-  "dangerousPermissions": []
+  "suspiciousUrls": [
+    "pastebin.com",
+    "raw.githubusercontent.com",
+    "gist.githubusercontent.com"
+  ],
+  "suspiciousKeywords": [
+    "eval",
+    "base64",
+    "obfuscate",
+    "webhook",
+    "token"
+  ],
+  "dangerousPermissions": [
+    "debugger",
+    "proxy",
+    "webRequest",
+    "webRequestBlocking"
+  ]
 }

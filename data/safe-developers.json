@@ -1,4 +1,14 @@
 {
-  "trustedDevelopers": [],
-  "verifiedPublishers": []
+  "trustedDevelopers": [
+    "Google LLC",
+    "Microsoft Corporation",
+    "Mozilla",
+    "Bitwarden Inc"
+  ],
+  "verifiedPublishers": [
+    "google.com",
+    "microsoft.com",
+    "mozilla.org",
+    "bitwarden.com"
+  ]
 }

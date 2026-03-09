@@ -3,7 +3,9 @@ export function clamp(value, min, max) {
 }
 
 export function gradeFromScore(score) {
-  if (score >= 8) return 'Safe';
-  if (score >= 5) return 'Medium';
-  return 'High Risk';
+  if (score >= 9) return 'A+';
+  if (score >= 7) return 'A';
+  if (score >= 5) return 'B';
+  if (score >= 3) return 'C';
+  return 'F';
 }

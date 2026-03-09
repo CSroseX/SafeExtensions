@@ -16,7 +16,7 @@ Unacceptable behavior includes harassment, discrimination, personal attacks, dox
 
 ## Reporting
 If you experience or witness a problem:
-- Prefer private reporting for sensitive matters. Email the maintainers at chitransh.saxena.contact@gmail.com.
+- Prefer direct maintainer reporting for sensitive matters via GitHub: https://github.com/CSroseX/SafeExtensions/issues
 - For non-sensitive issues, you may open a discussion or issue using a neutral title (for example, “Code of Conduct Concern”).
 - If you believe there is immediate risk, stop engagement and notify the maintainers.
 

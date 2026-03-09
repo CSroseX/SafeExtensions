@@ -9,7 +9,6 @@ export async function loadTrackerDB() {
     const json = await res.json();
     trackerDomains = json.domains || [];
   } catch (err) {
-    console.warn('Tracker DB load failed, continuing empty');
     trackerDomains = [];
   }
 

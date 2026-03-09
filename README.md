@@ -24,6 +24,12 @@ SafeExtensions scans installed Chrome extensions locally to surface privacy risk
 | Actions | Disable or uninstall from the popup | ✅ |
 | CSV export | Download scan summaries | ✅ |
 | IndexedDB storage | Persists scan results locally | ✅ |
+| Onboarding tour | Guided first-run walkthrough in popup | ✅ |
+| Safety disclaimer | Built-in disclaimer modal for risk interpretation | ✅ |
+
+## Manifest Permissions
+- `management`: read installed extension metadata for local analysis
+- `storage`: save scan results and onboarding state locally
 
 ## Future Work
 - More fingerprinting and network heuristics
@@ -42,4 +48,4 @@ Want to contribute? see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guideli
 ---
 This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE).
 
-Contact: chitransh.saxena.contact@gmail.com
+Support: Open an issue at https://github.com/CSroseX/SafeExtensions/issues

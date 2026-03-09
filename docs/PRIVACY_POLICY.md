@@ -13,7 +13,6 @@ Scan results are stored in your browser's IndexedDB. Data never leaves your devi
 We request only these permissions:
 - management: To read installed extension metadata
 - storage: To save scan results locally
-- alarms: To schedule periodic scans
 
 ## Contact
-Questions? Open an issue on GitHub or email at chitransh.saxena.contact@gmail.com.
+Questions? Open an issue on GitHub: https://github.com/CSroseX/SafeExtensions/issues

@@ -1,5 +1,6 @@
 import { BASE_SCORE, DANGEROUS_PERMISSIONS } from './constants.js';
 import { loadTrackerDB, isTrackerDomain } from '../libs/tracker-db.js';
+import { gradeFromScore } from '../libs/utils.js';
 
 const DANGEROUS_COMBOS = [
   {
@@ -45,14 +46,6 @@ const DANGEROUS_COMBOS = [
     description: 'Could capture everything you do on your computer, including passwords typed on screen.'
   }
 ];
-
-function gradeFromScore(score) {
-  if (score >= 9) return 'A+';
-  if (score >= 7) return 'A';
-  if (score >= 5) return 'B';
-  if (score >= 3) return 'C';
-  return 'F';
-}
 
 function analyzePermissionCombos(permissions, risks, score) {
   // Normalize permissions to reduce easy bypassing (e.g., webRequestBlocking equivalent)

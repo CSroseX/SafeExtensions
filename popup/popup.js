@@ -66,12 +66,6 @@ async function loadAndDisplay(options = {}) {
 
   allExtensions = await getAllScans();
 
-  // Log any records missing enabled field
-  const missingEnabled = allExtensions.filter(e => e.enabled === undefined);
-  if (missingEnabled.length > 0) {
-    console.warn(`${missingEnabled.length} records missing 'enabled' field:`, missingEnabled.map(e => e.name));
-  }
-
   updateTabCounts(allExtensions);
 
   applyFilterAndSort();
@@ -99,12 +93,6 @@ function hasBroadHostAccess(ext) {
   const hosts = ext.hostPermissions || [];
   return hosts.some(p => p === '<all_urls>' || p === '*://*/*' || p === 'http://*/*' || p === 'https://*/*');
 }
-
-// Removed unused function - kept for potential future use
-// function hasAnyAccess(ext) {
-//   const hosts = ext.hostPermissions || [];
-//   return hosts.length > 0;
-// }
 
 function updateTabCounts(results) {
   const allCount = results.length || 0;
@@ -394,7 +382,6 @@ function showLoading(show) {
   
   // Guard against missing elements
   if (!loading || !list || !empty) {
-    console.warn('Loading elements not found:', { loading, list, empty });
     return;
   }
   
@@ -428,7 +415,6 @@ function renderExtensions(results) {
   
   // Guard against missing elements
   if (!container || !emptyState) {
-    console.warn('Container elements not found');
     return;
   }
   
@@ -933,12 +919,10 @@ async function initializeOnboardingTour() {
   const popover = document.getElementById('tour-popover');
   tourCutout = document.getElementById('tour-cutout');
   if (!overlay || !popover) {
-    console.warn('Tour UI missing; skipping onboarding tour');
     return;
   }
 
   bindTourControls();
-  setupDevReset();
 
   try {
     const stored = await chrome.storage.local.get({ [TOUR_COMPLETED_KEY]: false });
@@ -1155,24 +1139,5 @@ function updateTourButtons() {
   prevBtn.disabled = tourState.index === 0;
   const isLast = tourState.index === TOUR_STEPS.length - 1;
   nextBtn.textContent = isLast ? 'Done' : 'Next';
-}
-
-function setupDevReset() {
-  const resetBtn = document.getElementById('tour-reset');
-  if (!resetBtn) return;
-
-  const isDev = new URLSearchParams(location.search).get('dev') === '1';
-  if (!isDev) return;
-
-  resetBtn.classList.remove('hidden');
-  resetBtn.addEventListener('click', async () => {
-    try {
-      await chrome.storage.local.remove(TOUR_COMPLETED_KEY);
-      tourState = { active: false, index: 0 };
-      startTour();
-    } catch (err) {
-      console.error('Tour reset failed', err);
-    }
-  });
 }
 

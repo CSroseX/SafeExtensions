@@ -2,7 +2,7 @@
 
 ## Project Overview
 - **Name:** SafeExtensions
-- **Version:** 1.0.0
+- **Version:** 1.1.0
 - **Type:** Chrome Extension Manifest V3
 - **Purpose:** Local privacy risk scanner for installed Chrome extensions with comprehensive risk detection, scoring, and management capabilities
 - **Goal:** Scan installed Chrome extensions locally and surface robust, hard-to-bypass privacy risks with clear explanations and controls

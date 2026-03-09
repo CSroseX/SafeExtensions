@@ -837,63 +837,42 @@ h6 { font-size: 12px; }
   color: #94a3b8;
 }
 
-/* Sticky filter bar when scrolling */
+/* Filter bar sticky behavior */
 .filter-bar {
   position: sticky;
   top: 0;
-  z-index: 20;
-  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: box-shadow;
-}
-
-.filter-bar {
-  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: box-shadow;
+  z-index: 10;
+  transition: box-shadow 300ms ease, background-color 300ms ease;
+  background-color: white;
 }
 
 .filter-bar.stuck {
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Collapsible sections (header, stats) */
+/* Smooth collapsible transitions */
 .collapsible-section {
-  overflow: hidden;
   transition: max-height 400ms cubic-bezier(0.4, 0, 0.2, 1),
               opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
-              padding 400ms cubic-bezier(0.4, 0, 0.2, 1),
-              margin 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: max-height, opacity;
+              margin-bottom 400ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 500px; /* Set higher than actual content */
+  opacity: 1;
+  transform: translateY(0);
+  overflow: hidden;
+}
+
+.collapsible-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-20px);
+  margin-bottom: 0;
+  pointer-events: none;
 }
 
 /* Instant collapse without animation (for loading state) */
 .collapsible-section.no-transition {
   transition: none !important;
-}
-
-#header-bar {
-  max-height: 160px;
-}
-
-#stats-bar {
-  max-height: 120px;
-}
-
-#header-bar.collapsed {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
-#stats-bar.collapsed {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  pointer-events: none;
 }
 
 /* ==================== GLOW EFFECT ==================== */

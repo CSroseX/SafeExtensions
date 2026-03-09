@@ -306,43 +306,72 @@ function attachDelegatedActions() {
 
 function attachScrollBehavior() {
   if (scrollInitialized) return;
+  
   const list = document.getElementById('extensions-list');
   const header = document.getElementById('header-bar');
   const stats = document.getElementById('stats-bar');
   const filterBar = document.querySelector('.filter-bar');
+  
   if (!list || !header || !stats || !filterBar) return;
-
+  
   scrollInitialized = true;
+  
   let collapsed = false;
-  const HIDE_THRESHOLD = 60; // Lower threshold starts collapse earlier for smooth progressive transition
-  const SHOW_THRESHOLD = 20; // Tight hysteresis for smooth feel
-  let lastStateChange = 0;
-  const STATE_COOLDOWN_MS = 100; // Reduced for more frequent smooth updates
-
+  const COLLAPSE_START = 40;  // Start fading out
+  const COLLAPSE_END = 80;    // Fully collapsed
+  const EXPAND_THRESHOLD = 30; // Start expanding back
+  
   list.addEventListener('scroll', () => {
     if (scrollTicking) return;
+    
     scrollTicking = true;
+    
     requestAnimationFrame(() => {
-      const y = list.scrollTop;
-      const now = Date.now();
-      const canToggle = (now - lastStateChange) > STATE_COOLDOWN_MS;
-
-      if (!collapsed && y > HIDE_THRESHOLD && canToggle) {
-        header.classList.add('collapsed');
-        stats.classList.add('collapsed');
-        filterBar.classList.add('stuck');
-        collapsed = true;
-        lastStateChange = now;
-      } else if (collapsed && y < SHOW_THRESHOLD && canToggle) {
+      const scrollTop = list.scrollTop;
+      
+      // Gradual fade on scroll down
+      if (scrollTop >= COLLAPSE_START && !collapsed) {
+        const progress = Math.min((scrollTop - COLLAPSE_START) / (COLLAPSE_END - COLLAPSE_START), 1);
+        
+        // Fade out gradually
+        header.style.opacity = 1 - progress;
+        stats.style.opacity = 1 - progress;
+        header.style.transform = `translateY(${-progress * 20}px)`;
+        stats.style.transform = `translateY(${-progress * 20}px)`;
+        
+        // Fully collapse at end of range
+        if (scrollTop >= COLLAPSE_END) {
+          header.classList.add('collapsed');
+          stats.classList.add('collapsed');
+          filterBar.classList.add('stuck');
+          collapsed = true;
+        }
+      }
+      
+      // Expand on scroll up
+      else if (scrollTop < EXPAND_THRESHOLD && collapsed) {
         header.classList.remove('collapsed');
         stats.classList.remove('collapsed');
         filterBar.classList.remove('stuck');
         collapsed = false;
-        lastStateChange = now;
+        
+        // Reset inline styles
+        header.style.opacity = '';
+        stats.style.opacity = '';
+        header.style.transform = '';
+        stats.style.transform = '';
       }
+      
+      // In-between zone (expanding back up)
+      else if (scrollTop < COLLAPSE_START && scrollTop > 0 && !collapsed) {
+        const progress = scrollTop / COLLAPSE_START;
+        header.style.opacity = 1 - (progress * 0.2); // Subtle fade hint
+        stats.style.opacity = 1 - (progress * 0.2);
+      }
+      
       scrollTicking = false;
     });
-  });
+  }, { passive: true });
 }
 
 function showLoading(show) {
@@ -431,14 +460,6 @@ function renderExtensions(results) {
     // No loading element or it's the last child, just append
     container.appendChild(fragment);
   }
-  
-  // Force synchronous layout calculation to stabilize scrollbar
-  container.offsetHeight;
-  
-  // Trigger smooth expansion animation
-  container.classList.remove('expanding');
-  void container.offsetHeight; // Trigger reflow to restart animation
-  container.classList.add('expanding');
 }
 
 function attachFilterControls() {
@@ -825,8 +846,15 @@ function scrollToFirstRisky() {
   // Add glow effect to the card
   targetCard.classList.add('glow-highlight');
 
-  // Scroll into view with smooth behavior
-  targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // SMOOTH SCROLL: Use manual scrolling instead of scrollIntoView
+  const list = document.getElementById('extensions-list');
+  const targetPosition = targetCard.offsetTop - 100; // 100px offset from top
+
+  // Smooth scroll with easing
+  list.scrollTo({
+    top: targetPosition,
+    behavior: 'smooth'
+  });
 
   // Remove glow effect after animation completes (3 cycles of 2s = 6s)
   setTimeout(() => {

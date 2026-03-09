@@ -11,17 +11,15 @@
 - **Core Focus:** Multi-layered privacy detection using permission analysis, dangerous permission combinations, host permission breadth analysis, known tracker detection, Content Security Policy analysis, update URL validation, and temporal age analysis
 - **Privacy Philosophy:** 100% local operation with zero data collection or external transmission
 - **License:** Mozilla Public License 2.0 (MPL-2.0)
-- **Author:** Chitransh Saxena <chitransh.saxena.contact@gmail.com>
+- **Author:** SafeExtensions Maintainers
 - **Repository:** https://github.com/CSroseX/SafeExtensions.git
-- **Development Status:** Production-ready version 1.0.0 with full feature implementation
+- **Development Status:** Production-ready version 1.1.0 with full feature implementation
 
 **Manifest Configuration**
 - **Manifest Version:** 3
 - **Permissions Required:**
 	- **management:** Access Chrome extension management API to enumerate, enable, disable, and uninstall extensions; retrieve extension metadata including permissions, host permissions, icons, version, install type
 	- **storage:** Access Chrome local storage API for onboarding tour completion state tracking
-	- **alarms:** Access Chrome alarms API for scheduled background tasks and periodic rescanning capabilities
-	- **notifications:** Access Chrome notifications API for user alerts about high-risk extension installations or changes
 - **Background Service Worker:** Runs persistently via background/service-worker.js as ES6 module to handle rescan requests, extension state change events, and initial installation scan
 - **Action Popup:** Default popup at popup/popup.html with 400x700px dimensions; extension toolbar icon with 16x16, 48x48, 128x128 variants
 - **Icons:** Three sizes provided at assets/icons/ directory (icon-16.png, icon-48.png, icon-128.png) for different display contexts in Chrome UI

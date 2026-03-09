@@ -9,9 +9,9 @@ assignees: ''
 ## ⚠️ Security Advisory Notice
 ⚠️ DO NOT disclose sensitive vulnerabilities publicly. Public issues may be closed without discussion.
 
-**For sensitive vulnerabilities, please report privately:**
+**For sensitive vulnerabilities, please report via the project issue tracker:**
 
-Email: chitransh.saxena.contact@gmail.com
+https://github.com/CSroseX/SafeExtensions/issues
 
 PLACEHOLDER: (GitHub Security Advisories are only available for public repositories)
 

@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "SafeExtensions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Scan installed Chrome extensions and detect privacy risks locally",
 
   "permissions": [
     "management",
-    "storage",
-    "alarms",
-    "notifications"
+    "storage"
   ],
+
+  "homepage_url": "https://safe-extensions.netlify.app/",
 
   "background": {
     "service_worker": "background/service-worker.js",

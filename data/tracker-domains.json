@@ -1,26 +1,61 @@
 {
-	"version": "1.0",
-	"lastUpdate": "2025-01-26",
+	"version": "1.1",
+	"lastUpdate": "2026-03-09",
 	"domains": [
 		"doubleclick.net",
 		"googleadservices.com",
 		"google-analytics.com",
+		"googletagmanager.com",
+		"googleads.g.doubleclick.net",
 		"facebook.com/tr",
+		"connect.facebook.net",
+		"analytics.twitter.com",
+		"ads.twitter.com",
+		"linkedin.com/px",
+		"snap.licdn.com",
+
 		"scorecardresearch.com",
 		"quantserve.com",
+		"chartbeat.com",
+		"hotjar.com",
+		"mouseflow.com",
+		"crazyegg.com",
+		"fullstory.com",
+		"logrocket.io",
+
+		"mixpanel.com",
+		"amplitude.com",
+		"segment.com",
+		"heap.io",
+		"kissmetrics.com",
+
 		"adnxs.com",
 		"adsrvr.org",
 		"criteo.com",
 		"outbrain.com",
 		"taboola.com",
-		"omniture.com",
+		"advertising.com",
+		"adform.net",
 		"moatads.com",
 		"2mdn.net",
-		"adform.net",
-		"advertising.com",
-		"chartbeat.com",
-		"hotjar.com",
-		"mouseflow.com",
-		"crazyegg.com"
+
+		"ads.yahoo.com",
+		"yahoo-analytics.com",
+
+		"branch.io",
+		"appsflyer.com",
+		"adjust.com",
+
+		"sentry.io",
+		"datadoghq.com",
+		"newrelic.com",
+		"bugsnag.com",
+
+		"cloudflareinsights.com",
+		"stats.g.doubleclick.net",
+
+		"optimizely.com",
+		"vwo.com",
+		"abtasty.com"
 	]
 }

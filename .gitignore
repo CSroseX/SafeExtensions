@@ -52,3 +52,8 @@ ci_fix/
 # Web extension artifacts
 web-ext-artifacts/
 check_yaml.py
+
+#----
+COMPREHENSIVE_RISK_ANALYSIS_TEST_PLAN.md
+QUICK_TESTING_GUIDE.md
+TEST_RESULTS_ANALYSIS_REPORT.md
